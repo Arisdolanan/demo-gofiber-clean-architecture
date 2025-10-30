@@ -36,5 +36,4 @@ bin/
 coverage.*
 /config.json
 main
-web
 app
