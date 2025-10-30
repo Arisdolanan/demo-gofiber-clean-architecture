@@ -24,9 +24,17 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
-.env
-
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+*.DS_Store
+
+tmp/
+*.idea
+bin/
+coverage.*
+/config.json
+main
+web
+app

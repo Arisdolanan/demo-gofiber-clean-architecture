@@ -1,0 +1,1128 @@
+basePath: /
+definitions:
+  controllers.TemplatePDFRequest:
+    properties:
+      filename:
+        type: string
+      template_data:
+        $ref: '#/definitions/pdfs.TemplateData'
+      template_name:
+        type: string
+      title:
+        type: string
+    required:
+    - filename
+    - template_data
+    - template_name
+    type: object
+  entity.AuthToken:
+    properties:
+      access_token:
+        type: string
+      expires_at:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  entity.ExcelData:
+    properties:
+      headers:
+        items:
+          type: string
+        type: array
+      rows:
+        items:
+          $ref: '#/definitions/entity.ExcelRow'
+        type: array
+    type: object
+  entity.ExcelExportRequest:
+    properties:
+      data: {}
+      filename:
+        type: string
+      sheet:
+        type: string
+      table:
+        type: string
+    required:
+    - data
+    - filename
+    - sheet
+    - table
+    type: object
+  entity.ExcelResponse:
+    properties:
+      filename:
+        type: string
+      rows:
+        type: integer
+      url:
+        type: string
+    type: object
+  entity.ExcelRow:
+    additionalProperties: true
+    type: object
+  entity.File:
+    properties:
+      category:
+        maxLength: 50
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        maxLength: 1000
+        type: string
+      filename:
+        maxLength: 255
+        minLength: 1
+        type: string
+      id:
+        type: integer
+      is_public:
+        type: boolean
+      mime_type:
+        maxLength: 100
+        minLength: 1
+        type: string
+      original_name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      path:
+        maxLength: 500
+        minLength: 1
+        type: string
+      size:
+        minimum: 1
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - filename
+    - mime_type
+    - original_name
+    - path
+    - size
+    type: object
+  entity.FileListResponse:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/entity.File'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  entity.FileUpdateRequest:
+    properties:
+      category:
+        maxLength: 50
+        type: string
+      description:
+        maxLength: 1000
+        type: string
+      is_public:
+        type: boolean
+    type: object
+  entity.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  entity.PDFRequest:
+    properties:
+      author:
+        type: string
+      filename:
+        type: string
+      html_content:
+        type: string
+      keywords:
+        type: string
+      subject:
+        type: string
+      title:
+        type: string
+    required:
+    - filename
+    - html_content
+    type: object
+  entity.PDFResponse:
+    properties:
+      filename:
+        type: string
+      url:
+        type: string
+    type: object
+  entity.PasswordResetConfirmRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  entity.PasswordResetRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  entity.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  entity.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  entity.ResendVerificationRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  entity.User:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      email:
+        type: string
+      email_verification_expires_at:
+        type: string
+      email_verification_token:
+        type: string
+      email_verified_at:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      password_reset_expires_at:
+        type: string
+      password_reset_token:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  entity.UserListResponse:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/entity.User'
+        type: array
+    type: object
+  pdfs.TemplateData:
+    additionalProperties: true
+    type: object
+  response.HTTPErrorResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/response.JSONError'
+        type: array
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  response.HTTPSuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  response.JSONError:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+  description: This is a sample server for using Swagger with Fiber.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fiber Swagger Example API
+  version: "1.0"
+paths:
+  /api/v1/admin/cleanup-tokens:
+    post:
+      consumes:
+      - application/json
+      description: Remove expired email verification and password reset tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cleanup completed successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Cleanup expired tokens
+      tags:
+      - admin
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Send password reset email to user
+      parameters:
+      - description: User email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.PasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset email sent successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Request password reset
+      tags:
+      - auth
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user with email and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.AuthToken'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Login failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Login a user
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user and invalidate both access and refresh tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Logout failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Logout user
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token refreshed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.AuthToken'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Invalid refresh token
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Refresh access token
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: Registration information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Registration failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /api/v1/auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Resend email verification link to user's email
+      parameters:
+      - description: User email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.ResendVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verification email sent successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid request or email already verified
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Resend verification email
+      tags:
+      - auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset user password using reset token
+      parameters:
+      - description: Reset token and new password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.PasswordResetConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid or expired token
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Reset password
+      tags:
+      - auth
+  /api/v1/auth/verify:
+    get:
+      consumes:
+      - application/json
+      description: Verify the JWT token and return user information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token verified successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Verify user token
+      tags:
+      - auth
+  /api/v1/auth/verify-email:
+    get:
+      consumes:
+      - application/json
+      description: Verify user's email address using verification token
+      parameters:
+      - description: Verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email verified successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid or expired token
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Verify user email
+      tags:
+      - auth
+  /api/v1/excel/export:
+    post:
+      consumes:
+      - application/json
+      description: Export data to an Excel file
+      parameters:
+      - description: Export request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.ExcelExportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Excel file generated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.ExcelResponse'
+              type: object
+        "400":
+          description: Invalid request or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Excel export failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Export data to Excel file
+      tags:
+      - excel
+  /api/v1/excel/import:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Import data from an uploaded Excel file
+      parameters:
+      - description: Excel file to import
+        in: formData
+        name: file
+        required: true
+        type: file
+      - default: Sheet1
+        description: Sheet name to import from
+        in: formData
+        name: sheet
+        type: string
+      - description: Target table name
+        in: formData
+        name: table
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Excel data imported successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.ExcelData'
+              type: object
+        "400":
+          description: Invalid request or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Excel import failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Import data from Excel file
+      tags:
+      - excel
+  /api/v1/files:
+    get:
+      consumes:
+      - application/json
+      description: Get files belonging to the authenticated user with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Files retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.FileListResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's files
+      tags:
+      - files
+  /api/v1/files/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a file and its metadata
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File deleted successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid file ID
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete file
+      tags:
+      - files
+    put:
+      consumes:
+      - application/json
+      description: Update file description, category, and public status
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: File update information
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/entity.FileUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.File'
+              type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update file metadata
+      tags:
+      - files
+  /api/v1/files/{id}/download:
+    get:
+      consumes:
+      - application/json
+      description: Download a file by ID
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File content
+          schema:
+            type: file
+        "400":
+          description: Invalid file ID
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Download file
+      tags:
+      - files
+  /api/v1/files/private:
+    get:
+      consumes:
+      - application/json
+      description: Get private files belonging to the authenticated user with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Private files retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.FileListResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's private files
+      tags:
+      - files
+  /api/v1/files/public:
+    get:
+      consumes:
+      - application/json
+      description: Get all public files with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public files retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.FileListResponse'
+              type: object
+      summary: Get public files
+      tags:
+      - files
+  /api/v1/files/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file with optional metadata
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: File description
+        in: formData
+        name: description
+        type: string
+      - description: File category
+        in: formData
+        name: category
+        type: string
+      - description: Whether file is public
+        in: formData
+        name: is_public
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: File uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.File'
+              type: object
+        "400":
+          description: Invalid request or file
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Upload a file
+      tags:
+      - files
+  /api/v1/pdf/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate a PDF file from HTML content
+      parameters:
+      - description: PDF generation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.PDFRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PDF generated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.PDFResponse'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: PDF generation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Generate PDF from HTML content
+      tags:
+      - pdf
+  /api/v1/pdf/generate-template:
+    post:
+      consumes:
+      - application/json
+      description: Generate a PDF file from a predefined template
+      parameters:
+      - description: PDF generation from template request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.TemplatePDFRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PDF generated successfully from template
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.PDFResponse'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: PDF generation failed
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Generate PDF from template
+      tags:
+      - pdf
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - default: 10
+        description: Limit (backward compatibility)
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset (backward compatibility)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.UserListResponse'
+              type: object
+        "500":
+          description: Failed to retrieve users
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the provided information
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entity.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.User'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Failed to create user
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /api/v1/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.User'
+              type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Get user by ID
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'JWT Authorization header using the Bearer scheme. Example: "Bearer
+      {token}"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

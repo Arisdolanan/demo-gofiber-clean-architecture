@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt</title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', 'Liberation Sans', 'Ubuntu', Arial, sans-serif;
+            margin: 20px;
+            max-width: 600px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .receipt-details {
+            margin-bottom: 20px;
+        }
+        .receipt-details table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'DejaVu Sans', 'Liberation Sans', 'Ubuntu', Arial, sans-serif;
+        }
+        .receipt-details th, .receipt-details td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 20px;
+            font-family: 'DejaVu Sans', 'Liberation Sans', 'Ubuntu', Arial, sans-serif;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+            font-family: 'DejaVu Sans', 'Liberation Sans', 'Ubuntu', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RECEIPT</h1>
+        <p>Receipt #: {{.ReceiptNumber}}</p>
+        <p>Date: {{.Date}}</p>
+    </div>
+
+    <div class="receipt-details">
+        <h2>Customer:</h2>
+        <p>{{.CustomerName}}</p>
+        <p>{{.CustomerAddress}}</p>
+
+        <h2>Transaction Details:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Items}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Quantity}}</td>
+                    <td>{{.Price}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="total">
+        <p>Total Paid: {{.Total}}</p>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>{{.CompanyInfo}}</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "demo-gofiber-clean-architecture",
+    "port": "3000",
+    "prefork": false
+  },
+  "database": {
+    "postgres": {
+      "host": "DBHOST",
+      "port": "DBPORT",
+      "username": "DBUSER",
+      "password": "DBPASS",
+      "dbname": "DBNAME",
+      "is_migrate": true,
+      "pool": {
+        "idle": 10,
+        "max": 100,
+        "lifetime": 300
+      }
+    },
+    "redis": {
+      "url": "DBURL:DBPORT",
+      "password": "DBPASS",
+      "db": 0,
+      "pool": {
+        "idle": 5,
+        "max": 10,
+        "lifetime": 300
+      }
+    }
+  },
+  "messaging": {
+    "rabbitmq": {
+      "url": "amqp://USER:PASS@HOST:PORT/",
+      "host": "HOST",
+      "port": "PORT",
+      "username": "USER",
+      "password": "PASS"
+    },
+    "kafka": {
+      "brokers": ["HOST:PORT"],
+      "username": "USER",
+      "password": "PASS",
+      "producer": {
+        "enabled": true
+      },
+      "bootstrap": {
+        "servers": "HOST:PORT"
+      },
+      "group": {
+        "id": "golang-clean-architecture"
+      },
+      "auto": {
+        "offset": {
+          "reset": "earliest"
+        }
+      }
+    }
+  },
+  "jwt": {
+    "secret": "your-super-secret-jwt-key-change-in-production"
+  },
+  "logging": {
+    "use_logrus": true,
+    "log_to_console": true,
+    "log_to_file": true,
+    "log_separate_by_level": true,
+    "log_custom_info_file": "",
+    "log_custom_warning_file": "",
+    "log_custom_error_file": "",
+    "log_directory": "storage/logs"
+  },
+  "pdf": {
+    "template_dir": "./internal/template/pdfs",
+    "binary_path": "/usr/local/bin/wkhtmltopdf"
+  },
+  "excel": {
+    "storage_dir": "./storage/private/excels"
+  },
+  "email": {
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "smtp_username": "YOUR_EMAIL@gmail.com",
+    "smtp_password": "YOUR_APP_PASSWORD",
+    "from_email": "YOUR_EMAIL@gmail.com",
+    "from_name": "GoFiber App",
+    "template_dir": "./internal/template/emails",
+    "verification_token_expiry": 3600,
+    "reset_token_expiry": 1800
+  }
+}
