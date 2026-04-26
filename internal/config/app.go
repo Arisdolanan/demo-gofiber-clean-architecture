@@ -56,6 +56,12 @@ func Bootstrap(cfg *BootstrapConfig) {
 	fileRepo := postgresql.NewFileRepository(cfg.DB)
 	emailRepo := postgresql.NewEmailRepository(cfg.DB)
 	authRedisRepo := redis.NewAuthRedisRepository(cfg.Redis.GetClient())
+	schoolRepo := postgresql.NewSchoolRepository(cfg.DB)
+	roleRepo := postgresql.NewRoleRepository(cfg.DB)
+	permRepo := postgresql.NewPermissionRepository(cfg.DB)
+	academicRepo := postgresql.NewAcademicRepository(cfg.DB)
+	peopleRepo := postgresql.NewPeopleRepository(cfg.DB)
+	operationRepo := postgresql.NewOperationRepository(cfg.DB)
 
 	// Get JWT secret from Viper
 	jwtSecret := configuration.GetJWTSecret()
@@ -76,6 +82,11 @@ func Bootstrap(cfg *BootstrapConfig) {
 	fileUsecase := usecase.NewFileUseCase(fileRepo, cfg.Log, cfg.Validate)
 	pdfUsecase := usecase.NewPDFUsecase(cfg.Log)
 	excelUsecase := usecase.NewExcelUsecase(cfg.Log)
+	schoolUsecase := usecase.NewSchoolUsecase(schoolRepo, cfg.Validate, cfg.Log)
+	rbacUsecase := usecase.NewRBACUsecase(roleRepo, permRepo, cfg.Validate, cfg.Log)
+	academicUsecase := usecase.NewAcademicUsecase(academicRepo, cfg.Validate, cfg.Log)
+	peopleUsecase := usecase.NewPeopleUsecase(peopleRepo, cfg.Validate, cfg.Log)
+	operationUsecase := usecase.NewOperationUsecase(operationRepo, cfg.Validate, cfg.Log)
 
 	// Initialize controller
 	authController := controllers.NewAuthController(authUsecase, cfg.Validate, cfg.Log)
@@ -84,6 +95,11 @@ func Bootstrap(cfg *BootstrapConfig) {
 	fileController := controllers.NewFileController(fileUsecase, cfg.Validate, cfg.Log)
 	pdfController := controllers.NewPDFController(pdfUsecase, cfg.Validate, cfg.Log)
 	excelController := controllers.NewExcelController(excelUsecase, cfg.Validate, cfg.Log, cfg.DB)
+	schoolController := controllers.NewSchoolController(schoolUsecase, cfg.Log)
+	rbacController := controllers.NewRBACController(rbacUsecase, cfg.Log)
+	academicController := controllers.NewAcademicController(academicUsecase, cfg.Log)
+	peopleController := controllers.NewPeopleController(peopleUsecase, cfg.Log)
+	operationController := controllers.NewOperationController(operationUsecase, cfg.Log)
 
 	// Initialize middleware with blacklisting support
 	authMiddleware := middleware.JWTProtectedWithBlacklist(jwtSecret, authRedisRepo)
@@ -98,8 +114,13 @@ func Bootstrap(cfg *BootstrapConfig) {
 		EmailController: emailController,
 		UserController:  userController,
 		FileController:  fileController,
-		PDFController:   pdfController,
-		ExcelController: excelController,
+		PDFController:       pdfController,
+		ExcelController:     excelController,
+		SchoolController:    schoolController,
+		RBACController:      rbacController,
+		AcademicController:  academicController,
+		PeopleController:    peopleController,
+		OperationController: operationController,
 	}
 	routeConfig.Setup()
 }

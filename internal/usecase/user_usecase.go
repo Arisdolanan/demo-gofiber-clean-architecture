@@ -19,6 +19,8 @@ type UserUseCase interface {
 	GetUserByEmail(email string) (*entity.User, error)
 	GetUserByUsername(username string) (*entity.User, error)
 	GetAllUsers(page, pageSize int) (*entity.UserListResponse, error)
+	GetUsersBySchool(schoolID int64, page, pageSize int) (*entity.UserListResponse, error)
+	GetUsersByType(userType entity.UserType, page, pageSize int) (*entity.UserListResponse, error)
 	UpdateUser(ctx context.Context, user *entity.User) error
 	DeleteUser(ctx context.Context, id int64) error
 	SoftDeleteUser(ctx context.Context, id int64) error
@@ -118,6 +120,64 @@ func (uc *userUseCase) GetAllUsers(page, pageSize int) (*entity.UserListResponse
 	pagination = utils.CalculatePagination(page, pageSize, totalCount)
 
 	// Convert []*entity.User to []entity.User
+	userList := make([]entity.User, len(users))
+	for i, user := range users {
+		if user != nil {
+			userList[i] = *user
+		}
+	}
+
+	return &entity.UserListResponse{
+		Users:      userList,
+		TotalCount: totalCount,
+		Page:       pagination.Page,
+		PageSize:   pagination.PageSize,
+		TotalPages: pagination.TotalPages,
+	}, nil
+}
+
+// GetUsersBySchool retrieves all users for a specific school with pagination
+func (uc *userUseCase) GetUsersBySchool(schoolID int64, page, pageSize int) (*entity.UserListResponse, error) {
+	pagination := utils.CalculatePagination(page, pageSize, 0)
+
+	users, err := uc.userRepo.FindAllBySchool(schoolID, pagination.PageSize, pagination.Offset)
+	if err != nil {
+		uc.log.Errorf("Error getting users for school %d: %v", schoolID, err)
+		return nil, err
+	}
+
+	totalCount := int64(len(users))
+	pagination = utils.CalculatePagination(page, pageSize, totalCount)
+
+	userList := make([]entity.User, len(users))
+	for i, user := range users {
+		if user != nil {
+			userList[i] = *user
+		}
+	}
+
+	return &entity.UserListResponse{
+		Users:      userList,
+		TotalCount: totalCount,
+		Page:       pagination.Page,
+		PageSize:   pagination.PageSize,
+		TotalPages: pagination.TotalPages,
+	}, nil
+}
+
+// GetUsersByType retrieves all users of a specific type with pagination
+func (uc *userUseCase) GetUsersByType(userType entity.UserType, page, pageSize int) (*entity.UserListResponse, error) {
+	pagination := utils.CalculatePagination(page, pageSize, 0)
+
+	users, err := uc.userRepo.FindByType(userType, pagination.PageSize, pagination.Offset)
+	if err != nil {
+		uc.log.Errorf("Error getting users by type %s: %v", userType, err)
+		return nil, err
+	}
+
+	totalCount := int64(len(users))
+	pagination = utils.CalculatePagination(page, pageSize, totalCount)
+
 	userList := make([]entity.User, len(users))
 	for i, user := range users {
 		if user != nil {

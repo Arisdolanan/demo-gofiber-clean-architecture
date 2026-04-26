@@ -29,26 +29,39 @@ func NewEmailController(emailUsecase usecase.EmailUsecase, validate *validator.V
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param token query string true "Verification token"
+// @Param request body entity.EmailVerificationRequest true "Verification token"
 // @Success 200 {object} response.HTTPSuccessResponse "Email verified successfully"
 // @Failure 400 {object} response.HTTPErrorResponse "Invalid or expired token"
 // @Failure 500 {object} response.HTTPErrorResponse "Internal server error"
-// @Router /api/v1/auth/verify-email [get]
+// @Router /api/v1/auth/verify-email [post]
 func (c *EmailController) VerifyEmail(ctx *fiber.Ctx) error {
-	token := ctx.Query("token")
-	if token == "" {
-		c.log.Error("Verification token is required")
+	var req entity.EmailVerificationRequest
+
+	if err := ctx.BodyParser(&req); err != nil {
+		c.log.Errorf("Error parsing request body: %v", err)
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
 			Status:  fiber.StatusBadRequest,
-			Message: "Verification token is required",
+			Message: "Invalid request body",
 			Errors: []response.JSONError{
-				{Status: fiber.StatusBadRequest, Message: "Token parameter is missing"},
+				{Status: fiber.StatusBadRequest, Message: err.Error()},
+			},
+		})
+	}
+
+	// Validate request
+	if err := c.validate.Struct(req); err != nil {
+		c.log.Errorf("Validation error: %v", err)
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
+			Status:  fiber.StatusBadRequest,
+			Message: "Validation failed",
+			Errors: []response.JSONError{
+				{Status: fiber.StatusBadRequest, Message: err.Error()},
 			},
 		})
 	}
 
 	// Verify email
-	if err := c.emailUsecase.VerifyEmail(token); err != nil {
+	if err := c.emailUsecase.VerifyEmail(req.Token); err != nil {
 		c.log.Errorf("Email verification failed: %v", err)
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
 			Status:  fiber.StatusBadRequest,

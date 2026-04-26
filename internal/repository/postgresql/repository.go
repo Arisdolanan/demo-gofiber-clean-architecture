@@ -41,14 +41,10 @@ func (r *BaseRepository[T]) Create(ctx context.Context, entity *T) error {
 	// Handle audit fields for entities that have them
 	now := time.Now()
 	if _, hasCreatedAt := values["created_at"]; hasCreatedAt {
-		if values["created_at"] == nil {
-			values["created_at"] = &now
-		}
+		values["created_at"] = now
 	}
 	if _, hasUpdatedAt := values["updated_at"]; hasUpdatedAt {
-		if values["updated_at"] == nil {
-			values["updated_at"] = &now
-		}
+		values["updated_at"] = now
 	}
 
 	// Handle audit trail fields if context contains user ID
@@ -71,18 +67,6 @@ func (r *BaseRepository[T]) Create(ctx context.Context, entity *T) error {
 	// Set the ID back to the entity
 	r.setEntityID(entity, id)
 
-	// Update entity with the actual created_at and updated_at values from database
-	if createdAtPtr, ok := r.getEntityFieldPtr(entity, "CreatedAt"); ok && createdAtPtr != nil {
-		if createdAtField, valid := createdAtPtr.(**time.Time); valid && *createdAtField == nil {
-			*createdAtField = &now
-		}
-	}
-	if updatedAtPtr, ok := r.getEntityFieldPtr(entity, "UpdatedAt"); ok && updatedAtPtr != nil {
-		if updatedAtField, valid := updatedAtPtr.(**time.Time); valid && *updatedAtField == nil {
-			*updatedAtField = &now
-		}
-	}
-
 	return nil
 }
 
@@ -90,9 +74,10 @@ func (r *BaseRepository[T]) Create(ctx context.Context, entity *T) error {
 func (r *BaseRepository[T]) Update(ctx context.Context, entity *T, whereClause string, args ...any) error {
 	values := r.structToMap(entity)
 
-	// Remove ID from update values
+	// Remove fields that shouldn't be updated
 	delete(values, "id")
-	delete(values, "created_at") // Don't update creation time
+	delete(values, "created_at")
+	delete(values, "created_by")
 
 	// Handle audit fields for entities that have them
 	if _, hasUpdatedAt := values["updated_at"]; hasUpdatedAt {
@@ -129,7 +114,6 @@ func (r *BaseRepository[T]) SoftDelete(ctx context.Context, whereClause string, 
 	// Handle audit trail fields if context contains user ID
 	if userID := ctx.Value("user_id"); userID != nil {
 		if userIDVal, ok := userID.(int64); ok {
-			// Check if entity has deleted_by field and set it if available
 			values["deleted_by"] = &userIDVal
 		}
 	}
@@ -202,6 +186,7 @@ func (r *BaseRepository[T]) FindAllWithPagination(ctx context.Context, limit, of
 	err := query.
 		Order("created_at DESC").
 		Limit(limit).
+		Offset(offset).
 		Find(ctx, &entities)
 
 	if err != nil {
@@ -255,21 +240,30 @@ func (r *BaseRepository[T]) ExecContext(ctx context.Context, query string, args 
 // structToMap converts a struct to a map for database operations
 func (r *BaseRepository[T]) structToMap(entity *T) map[string]any {
 	values := make(map[string]any)
-	v := reflect.ValueOf(entity).Elem()
+	r.mapFields(reflect.ValueOf(entity).Elem(), values)
+	return values
+}
+
+// mapFields recursively maps struct fields to a map based on db tags
+func (r *BaseRepository[T]) mapFields(v reflect.Value, values map[string]any) {
 	t := v.Type()
 
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
-		tag := t.Field(i).Tag.Get("db")
+		fieldType := t.Field(i)
+		tag := fieldType.Tag.Get("db")
+
+		// If it's an embedded struct and has no db tag, recurse
+		if fieldType.Anonymous && field.Kind() == reflect.Struct && tag == "" {
+			r.mapFields(field, values)
+			continue
+		}
 
 		if tag != "" && tag != "-" {
-			// Convert field name to snake_case for database
-			dbName := r.toSnakeCase(tag)
-			values[dbName] = field.Interface()
+			// Use the tag as provided in the db tag (usually already snake_case)
+			values[tag] = field.Interface()
 		}
 	}
-
-	return values
 }
 
 // getEntityFieldPtr gets a pointer to a field in the entity by name

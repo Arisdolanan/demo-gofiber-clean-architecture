@@ -14,6 +14,8 @@ type UserRepository interface {
 	FindByEmail(email string) (*entity.User, error)
 	FindByUsername(username string) (*entity.User, error)
 	FindAll(limit, offset int) ([]*entity.User, error)
+	FindAllBySchool(schoolID int64, limit, offset int) ([]*entity.User, error)
+	FindByType(userType entity.UserType, limit, offset int) ([]*entity.User, error)
 	Update(user *entity.User) error
 	UpdateWithContext(ctx context.Context, user *entity.User) error
 	Delete(id int64) error
@@ -59,6 +61,16 @@ func (r *userRepository) FindByUsername(username string) (*entity.User, error) {
 func (r *userRepository) FindAll(limit, offset int) ([]*entity.User, error) {
 	ctx := context.Background()
 	return r.BaseRepository.FindAllWithPagination(ctx, limit, offset, "deleted_at IS NULL")
+}
+
+func (r *userRepository) FindAllBySchool(schoolID int64, limit, offset int) ([]*entity.User, error) {
+	ctx := context.Background()
+	return r.BaseRepository.FindAllWithPagination(ctx, limit, offset, "school_id = $1 AND deleted_at IS NULL", schoolID)
+}
+
+func (r *userRepository) FindByType(userType entity.UserType, limit, offset int) ([]*entity.User, error) {
+	ctx := context.Background()
+	return r.BaseRepository.FindAllWithPagination(ctx, limit, offset, "user_type = $1 AND deleted_at IS NULL", userType)
 }
 
 func (r *userRepository) Update(user *entity.User) error {

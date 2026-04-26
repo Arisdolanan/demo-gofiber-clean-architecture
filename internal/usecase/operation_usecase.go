@@ -1,0 +1,244 @@
+package usecase
+
+import (
+	"context"
+
+	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/entity"
+	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/repository/postgresql"
+	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
+)
+
+type OperationUsecase interface {
+	// Schedules
+	CreateSchedule(ctx context.Context, schedule *entity.Schedule) error
+	UpdateSchedule(ctx context.Context, schedule *entity.Schedule) error
+	DeleteSchedule(ctx context.Context, id int64) error
+	GetAllSchedules(ctx context.Context, filters map[string]interface{}) ([]*entity.Schedule, error)
+	GetSchedulesBySection(ctx context.Context, sectionID int64) ([]*entity.Schedule, error)
+	GetSchedulesByTeacher(ctx context.Context, teacherID int64) ([]*entity.Schedule, error)
+
+	// Exams
+	CreateExam(ctx context.Context, exam *entity.Exam) error
+	UpdateExam(ctx context.Context, exam *entity.Exam) error
+	DeleteExam(ctx context.Context, id int64) error
+	GetAllExams(ctx context.Context, filters map[string]interface{}) ([]*entity.Exam, error)
+	GetExamByID(ctx context.Context, id int64) (*entity.Exam, error)
+	GetExamsBySection(ctx context.Context, sectionID int64) ([]*entity.Exam, error)
+
+	// Marks
+	UpdateMark(ctx context.Context, mark *entity.ExamMark) error
+	GetExamMarks(ctx context.Context, examID int64) ([]*entity.ExamMark, error)
+	GetStudentMarks(ctx context.Context, studentID int64) ([]*entity.ExamMark, error)
+
+	// Attendance
+	RecordStudentAttendance(ctx context.Context, attendance *entity.StudentAttendance) error
+	UpdateStudentAttendance(ctx context.Context, attendance *entity.StudentAttendance) error
+	GetStudentAttendance(ctx context.Context, studentID int64, filters map[string]interface{}) ([]*entity.StudentAttendance, error)
+	GetAttendanceBySection(ctx context.Context, sectionID int64, date string) ([]*entity.StudentAttendance, error)
+	GetAttendanceWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entity.StudentAttendance, error)
+	RecordTeacherAttendance(ctx context.Context, attendance *entity.TeacherAttendance) error
+
+	// Notifications
+	NotifyUser(ctx context.Context, notification *entity.Notification) error
+	GetUserNotifications(ctx context.Context, userID int64) ([]*entity.Notification, error)
+
+	// Report Card
+	GetStudentReportCard(ctx context.Context, studentID, sessionID int64) (*entity.ReportCard, error)
+	GetSectionReportCards(ctx context.Context, sectionID, sessionID int64) ([]*entity.ReportCard, error)
+}
+
+type operationUsecase struct {
+	repo     postgresql.OperationRepository
+	validate *validator.Validate
+	log      *logrus.Logger
+}
+
+func NewOperationUsecase(repo postgresql.OperationRepository, validate *validator.Validate, log *logrus.Logger) OperationUsecase {
+	return &operationUsecase{
+		repo:     repo,
+		validate: validate,
+		log:      log,
+	}
+}
+
+func (uc *operationUsecase) CreateSchedule(ctx context.Context, schedule *entity.Schedule) error {
+	if err := uc.validate.Struct(schedule); err != nil {
+		return err
+	}
+	return uc.repo.CreateSchedule(ctx, schedule)
+}
+
+func (uc *operationUsecase) UpdateSchedule(ctx context.Context, schedule *entity.Schedule) error {
+	if err := uc.validate.Struct(schedule); err != nil {
+		return err
+	}
+	return uc.repo.UpdateSchedule(ctx, schedule)
+}
+
+func (uc *operationUsecase) DeleteSchedule(ctx context.Context, id int64) error {
+	return uc.repo.DeleteSchedule(ctx, id)
+}
+
+func (uc *operationUsecase) GetAllSchedules(ctx context.Context, filters map[string]interface{}) ([]*entity.Schedule, error) {
+	return uc.repo.GetAllSchedules(ctx, filters)
+}
+
+func (uc *operationUsecase) GetSchedulesBySection(ctx context.Context, sectionID int64) ([]*entity.Schedule, error) {
+	return uc.repo.FindSchedulesBySection(ctx, sectionID)
+}
+
+func (uc *operationUsecase) GetSchedulesByTeacher(ctx context.Context, teacherID int64) ([]*entity.Schedule, error) {
+	return uc.repo.GetSchedulesByTeacher(ctx, teacherID)
+}
+
+func (uc *operationUsecase) CreateExam(ctx context.Context, exam *entity.Exam) error {
+	if err := uc.validate.Struct(exam); err != nil {
+		return err
+	}
+	return uc.repo.CreateExam(ctx, exam)
+}
+
+func (uc *operationUsecase) UpdateExam(ctx context.Context, exam *entity.Exam) error {
+	if err := uc.validate.Struct(exam); err != nil {
+		return err
+	}
+	return uc.repo.UpdateExam(ctx, exam)
+}
+
+func (uc *operationUsecase) DeleteExam(ctx context.Context, id int64) error {
+	return uc.repo.DeleteExam(ctx, id)
+}
+
+func (uc *operationUsecase) GetAllExams(ctx context.Context, filters map[string]interface{}) ([]*entity.Exam, error) {
+	return uc.repo.GetAllExams(ctx, filters)
+}
+
+func (uc *operationUsecase) GetExamByID(ctx context.Context, id int64) (*entity.Exam, error) {
+	return uc.repo.GetExamByID(ctx, id)
+}
+
+func (uc *operationUsecase) GetExamsBySection(ctx context.Context, sectionID int64) ([]*entity.Exam, error) {
+	return uc.repo.FindExamsBySection(ctx, sectionID)
+}
+
+func (uc *operationUsecase) UpdateMark(ctx context.Context, mark *entity.ExamMark) error {
+	if err := uc.validate.Struct(mark); err != nil {
+		return err
+	}
+	return uc.repo.UpdateMark(ctx, mark)
+}
+
+func (uc *operationUsecase) GetExamMarks(ctx context.Context, examID int64) ([]*entity.ExamMark, error) {
+	return uc.repo.GetMarksByExam(ctx, examID)
+}
+
+func (uc *operationUsecase) GetStudentMarks(ctx context.Context, studentID int64) ([]*entity.ExamMark, error) {
+	return uc.repo.GetMarksByStudent(ctx, studentID)
+}
+
+func (uc *operationUsecase) RecordStudentAttendance(ctx context.Context, attendance *entity.StudentAttendance) error {
+	if err := uc.validate.Struct(attendance); err != nil {
+		return err
+	}
+	return uc.repo.RecordStudentAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) UpdateStudentAttendance(ctx context.Context, attendance *entity.StudentAttendance) error {
+	if err := uc.validate.Struct(attendance); err != nil {
+		return err
+	}
+	return uc.repo.UpdateStudentAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) GetStudentAttendance(ctx context.Context, studentID int64, filters map[string]interface{}) ([]*entity.StudentAttendance, error) {
+	return uc.repo.GetStudentAttendance(ctx, studentID, filters)
+}
+
+func (uc *operationUsecase) GetAttendanceBySection(ctx context.Context, sectionID int64, date string) ([]*entity.StudentAttendance, error) {
+	return uc.repo.GetSectionAttendance(ctx, sectionID, date)
+}
+
+func (uc *operationUsecase) GetAttendanceWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entity.StudentAttendance, error) {
+	return uc.repo.GetAttendanceWithFilters(ctx, filters)
+}
+
+func (uc *operationUsecase) RecordTeacherAttendance(ctx context.Context, attendance *entity.TeacherAttendance) error {
+	if err := uc.validate.Struct(attendance); err != nil {
+		return err
+	}
+	return uc.repo.RecordTeacherAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) NotifyUser(ctx context.Context, notification *entity.Notification) error {
+	return uc.repo.CreateNotification(ctx, notification)
+}
+
+func (uc *operationUsecase) GetUserNotifications(ctx context.Context, userID int64) ([]*entity.Notification, error) {
+	return uc.repo.GetNotificationsByUser(ctx, userID)
+}
+
+func (uc *operationUsecase) GetStudentReportCard(ctx context.Context, studentID, sessionID int64) (*entity.ReportCard, error) {
+	marks, err := uc.repo.GetStudentMarksBySession(ctx, studentID, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	attendance, err := uc.repo.GetStudentAttendanceBySession(ctx, studentID, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	report := &entity.ReportCard{
+		StudentID:         studentID,
+		AcademicSessionID: sessionID,
+		SubjectGrades:     []entity.SubjectGrade{},
+		AttendanceSummary: make(map[string]int),
+	}
+
+	subjectMap := make(map[int64]*entity.SubjectGrade)
+	totalScore := 0.0
+	count := 0
+
+	for _, m := range marks {
+		if _, ok := subjectMap[m.ExamID]; !ok {
+			subjectMap[m.ExamID] = &entity.SubjectGrade{SubjectID: m.ExamID}
+		}
+		subjectMap[m.ExamID].Grades = append(subjectMap[m.ExamID].Grades, m.Score)
+		totalScore += m.Score
+		count++
+	}
+
+	for _, sg := range subjectMap {
+		sum := 0.0
+		for _, g := range sg.Grades {
+			sum += g
+		}
+		sg.Average = sum / float64(len(sg.Grades))
+		report.SubjectGrades = append(report.SubjectGrades, *sg)
+	}
+
+	if count > 0 {
+		report.TotalAverage = totalScore / float64(count)
+	}
+
+	for _, a := range attendance {
+		report.AttendanceSummary[a.Status]++
+	}
+
+	return report, nil
+}
+
+func (uc *operationUsecase) GetSectionReportCards(ctx context.Context, sectionID, sessionID int64) ([]*entity.ReportCard, error) {
+	// TODO: This is a placeholder implementation
+	// In production, you would need to:
+	// 1. Get all students in the section from student_sections table
+	// 2. Get marks for each student from exams in this session
+	// 3. Calculate grades and averages
+	// 4. Get attendance summary
+	//
+	// For now, returning empty slice as this requires PeopleRepository access
+	// which is not available in OperationUsecase
+	uc.log.Infof("GetSectionReportCards: sectionID=%d, sessionID=%d", sectionID, sessionID)
+	return []*entity.ReportCard{}, nil
+}

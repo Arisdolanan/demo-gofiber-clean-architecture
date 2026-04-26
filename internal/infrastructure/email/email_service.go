@@ -36,7 +36,11 @@ func NewEmailService(logger *logrus.Logger) EmailService {
 
 // SendVerificationEmail sends email verification email
 func (e *emailService) SendVerificationEmail(userEmail, token string) error {
-	verificationURL := fmt.Sprintf("http://localhost:3000/api/v1/auth/verify-email?token=%s", token)
+	baseURL := e.config.BaseURL
+	if baseURL == "" {
+		baseURL = "http://localhost:3000" // Fallback
+	}
+	verificationURL := fmt.Sprintf("%s/api/v1/auth/verify-email?token=%s", baseURL, token)
 
 	data := entity.EmailVerificationData{
 		UserEmail:       userEmail,
@@ -62,7 +66,11 @@ func (e *emailService) SendVerificationEmail(userEmail, token string) error {
 
 // SendPasswordResetEmail sends password reset email
 func (e *emailService) SendPasswordResetEmail(userEmail, token string) error {
-	resetURL := fmt.Sprintf("http://localhost:3000/api/v1/auth/reset-password?token=%s", token)
+	baseURL := e.config.BaseURL
+	if baseURL == "" {
+		baseURL = "http://localhost:3000" // Fallback
+	}
+	resetURL := fmt.Sprintf("%s/api/v1/auth/reset-password?token=%s", baseURL, token)
 
 	data := entity.PasswordResetData{
 		UserEmail:      userEmail,
@@ -116,15 +124,19 @@ func (e *emailService) SendEmail(emailTemplate *entity.EmailTemplate) error {
 		body.String(),
 	)
 
-	auth := smtp.PlainAuth("", e.config.SMTPUsername, e.config.SMTPPassword, e.config.SMTPHost)
+	// Send email asynchronously in a goroutine
+	go func() {
+		auth := smtp.PlainAuth("", e.config.SMTPUsername, e.config.SMTPPassword, e.config.SMTPHost)
 
-	addr := fmt.Sprintf("%s:%d", e.config.SMTPHost, e.config.SMTPPort)
-	err = smtp.SendMail(addr, auth, e.config.FromEmail, []string{emailTemplate.To}, []byte(message))
-	if err != nil {
-		e.logger.Errorf("Error sending email to %s: %v", emailTemplate.To, err)
-		return fmt.Errorf("failed to send email: %w", err)
-	}
+		addr := fmt.Sprintf("%s:%d", e.config.SMTPHost, e.config.SMTPPort)
+		err := smtp.SendMail(addr, auth, e.config.FromEmail, []string{emailTemplate.To}, []byte(message))
+		if err != nil {
+			e.logger.Errorf("Error sending email to %s: %v", emailTemplate.To, err)
+			return
+		}
 
-	e.logger.Infof("Email sent successfully to %s", emailTemplate.To)
+		e.logger.Infof("Email sent successfully to %s", emailTemplate.To)
+	}()
+
 	return nil
 }

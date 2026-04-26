@@ -85,6 +85,7 @@
     "from_email": "YOUR_EMAIL@gmail.com",
     "from_name": "GoFiber App",
     "template_dir": "./internal/template/emails",
+    "base_url": "http://localhost:3000",
     "verification_token_expiry": 3600,
     "reset_token_expiry": 1800
   }

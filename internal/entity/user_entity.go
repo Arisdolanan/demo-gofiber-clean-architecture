@@ -4,15 +4,30 @@ import (
 	"time"
 )
 
+type UserType string
+
+const (
+	UserSuperAdmin UserType = "super_admin"
+	UserAdmin      UserType = "admin"
+	UserTeacher    UserType = "teacher"
+	UserStudent    UserType = "student"
+	UserParent     UserType = "parent"
+)
+
 type User struct {
 	ID                         int64      `json:"id" db:"id"`
+	SchoolID                   *int64     `json:"school_id,omitempty" db:"school_id"`
 	Username                   string     `json:"username" db:"username"`
 	Email                      string     `json:"email" db:"email"`
 	Password                   string     `json:"password" db:"password"`
+	FullName                   string     `json:"full_name" db:"full_name"`
+	UserType                   UserType   `json:"user_type" db:"user_type"`
+	IsActive                   bool       `json:"is_active" db:"is_active"`
+	LastLoginAt                *time.Time `json:"last_login_at,omitempty" db:"last_login_at"`
 	CreatedAt                  time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt                  time.Time  `json:"updated_at" db:"updated_at"`
 	DeletedAt                  *time.Time `json:"deleted_at" db:"deleted_at"`
-	EmailVerifiedAt            *time.Time `json:"email_verified_at" db:"email_verified_at"`
+	EmailVerifiedAt             *time.Time `json:"email_verified_at" db:"email_verified_at"`
 	EmailVerificationToken     *string    `json:"email_verification_token,omitempty" db:"email_verification_token"`
 	EmailVerificationExpiresAt *time.Time `json:"email_verification_expires_at,omitempty" db:"email_verification_expires_at"`
 	PasswordResetToken         *string    `json:"password_reset_token,omitempty" db:"password_reset_token"`

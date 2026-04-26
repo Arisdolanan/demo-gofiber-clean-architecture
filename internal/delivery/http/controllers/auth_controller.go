@@ -60,7 +60,7 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 		})
 	}
 
-	if err := c.authUsecase.Register(req.Email, req.Password); err != nil {
+	if err := c.authUsecase.Register(req.Email, req.Password, req.SchoolID, req.UserType); err != nil {
 		c.log.Errorf("Registration error: %v", err)
 
 		// Check if it's a password complexity error

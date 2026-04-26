@@ -14,8 +14,10 @@ type LoginRequest struct {
 }
 
 type RegisterRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+	Email    string   `json:"email" validate:"required,email"`
+	Password string   `json:"password" validate:"required,min=8"`
+	SchoolID *int64   `json:"school_id"`
+	UserType UserType `json:"user_type" validate:"required"`
 }
 
 type RefreshTokenRequest struct {

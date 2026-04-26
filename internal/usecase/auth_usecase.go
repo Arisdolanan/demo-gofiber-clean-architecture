@@ -14,7 +14,7 @@ import (
 )
 
 type AuthUsecase interface {
-	Register(email, password string) error
+	Register(email, password string, schoolID *int64, userType entity.UserType) error
 	Login(email, password string) (*entity.AuthToken, error)
 	RefreshToken(refreshToken string) (*entity.AuthToken, error)
 	Logout(userID int64, accessToken string) error
@@ -59,7 +59,7 @@ func NewAuthUsecase(
 }
 
 // Register handles user registration
-func (uc *authUsecase) Register(email, password string) error {
+func (uc *authUsecase) Register(email, password string, schoolID *int64, userType entity.UserType) error {
 	// Validate password complexity first
 	if err := uc.ValidatePasswordComplexity(password); err != nil {
 		uc.log.Errorf("Password complexity validation failed for %s: %v", email, err)
@@ -86,10 +86,13 @@ func (uc *authUsecase) Register(email, password string) error {
 
 	// Create user
 	user := &entity.User{
-		Email:     email,
-		Password:  hashedPassword,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Email:       email,
+		Password:    hashedPassword,
+		SchoolID:    schoolID,
+		UserType:    userType,
+		IsActive:    true,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	if err := uc.authRepo.Register(user); err != nil {

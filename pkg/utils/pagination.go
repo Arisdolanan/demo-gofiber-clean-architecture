@@ -141,6 +141,11 @@ func ParseInt64FromParam(ctx *fiber.Ctx, paramName string) (int64, error) {
 	return strconv.ParseInt(paramStr, 10, 64)
 }
 
+// ParseInt64 parses a string to int64
+func ParseInt64(s string) (int64, error) {
+	return strconv.ParseInt(s, 10, 64)
+}
+
 // ParseIntFromQuery safely parses int from query parameter with default
 func ParseIntFromQuery(ctx *fiber.Ctx, paramName string, defaultValue int) int {
 	paramStr := ctx.Query(paramName)

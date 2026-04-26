@@ -53,5 +53,7 @@ func main() {
 		RabbitMQProducer: rabbitProducer,
 	})
 
-	app.Listen(":" + configuration.GetAppPort())
+	if err := app.Listen(":" + configuration.GetAppPort()); err != nil {
+		log.Fatalf("Error starting server: %v", err)
+	}
 }

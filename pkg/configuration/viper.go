@@ -3,6 +3,7 @@ package configuration
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -146,6 +147,7 @@ type EmailConfig struct {
 	FromEmail               string `mapstructure:"from_email"`
 	FromName                string `mapstructure:"from_name"`
 	TemplateDir             string `mapstructure:"template_dir"`
+	BaseURL                 string `mapstructure:"base_url"`
 	VerificationTokenExpiry int    `mapstructure:"verification_token_expiry"`
 	ResetTokenExpiry        int    `mapstructure:"reset_token_expiry"`
 }
@@ -167,6 +169,7 @@ func LoadConfig() (*Config, error) {
 
 	// Allow viper to read Environment variables
 	viper.SetEnvPrefix("APP")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// Read the configuration file
 	if err := viper.ReadInConfig(); err != nil {

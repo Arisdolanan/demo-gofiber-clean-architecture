@@ -82,6 +82,7 @@ type Query struct {
 	where  string
 	args   []any
 	limit  string
+	offset string
 	order  string
 	joins  string
 	values map[string]any
@@ -103,6 +104,11 @@ func (q *Query) Where(cond string, args ...any) *Query {
 
 func (q *Query) Limit(limit int) *Query {
 	q.limit = fmt.Sprintf(" LIMIT %d", limit)
+	return q
+}
+
+func (q *Query) Offset(offset int) *Query {
+	q.offset = fmt.Sprintf(" OFFSET %d", offset)
 	return q
 }
 
@@ -130,6 +136,9 @@ func (q *Query) Find(ctx context.Context, dest any) error {
 	}
 	if q.limit != "" {
 		query += q.limit
+	}
+	if q.offset != "" {
+		query += q.offset
 	}
 	return q.db.Select(ctx, dest, query, q.args...)
 }
