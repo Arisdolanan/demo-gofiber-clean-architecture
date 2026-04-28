@@ -9,19 +9,20 @@ import (
 )
 
 type RouteConfig struct {
-	App             *fiber.App
-	AuthMiddleware  fiber.Handler
-	AuthController  *controllers.AuthController
-	EmailController *controllers.EmailController
-	UserController  *controllers.UserController
-	PDFController   *controllers.PDFController
-	ExcelController *controllers.ExcelController
+	App                 *fiber.App
+	AuthMiddleware      fiber.Handler
+	AuthController      *controllers.AuthController
+	EmailController     *controllers.EmailController
+	UserController      *controllers.UserController
+	PDFController       *controllers.PDFController
+	ExcelController     *controllers.ExcelController
 	FileController      *controllers.FileController
 	SchoolController    *controllers.SchoolController
 	RBACController      *controllers.RBACController
 	AcademicController  *controllers.AcademicController
 	PeopleController    *controllers.PeopleController
 	OperationController *controllers.OperationController
+	ClientLogController *controllers.ClientLogController
 }
 
 func (c *RouteConfig) Setup() {
@@ -49,6 +50,12 @@ func (c *RouteConfig) SetupGuestRoute() {
 
 	// Public file routes (no authentication required)
 	c.App.Get("/api/v1/files/public", c.FileController.GetPublicFiles)
+
+	// Client error logging routes (public - no authentication required)
+	// This allows frontend/mobile apps to send error logs even when not authenticated
+	clientLogs := c.App.Group("/api/v1/client-logs")
+	clientLogs.Post("/error", c.ClientLogController.LogError)
+	clientLogs.Post("/info", c.ClientLogController.LogInfo)
 }
 
 func (c *RouteConfig) SetupAuthRoute() {
@@ -152,7 +159,7 @@ func (c *RouteConfig) SetupAuthRoute() {
 	people.Put("/teachers/:id", c.PeopleController.UpdateTeacher)
 	people.Get("/teachers", c.PeopleController.GetTeachers)
 	people.Get("/teachers/users/:user_id", c.PeopleController.GetTeacherByUserID)
-	
+
 	people.Post("/students", c.PeopleController.CreateStudent)
 	people.Put("/students/:id", c.PeopleController.UpdateStudent)
 	people.Get("/students/list", c.PeopleController.GetAllStudents)
@@ -160,9 +167,17 @@ func (c *RouteConfig) SetupAuthRoute() {
 	people.Get("/students/:student_id/sections", c.PeopleController.GetStudentSections)
 	people.Get("/sections/:section_id/students", c.PeopleController.GetStudentsBySection)
 	people.Post("/enroll", c.PeopleController.EnrollStudent)
-	
+
 	people.Post("/parents", c.PeopleController.CreateParent)
+	people.Get("/parents", c.PeopleController.GetParents)
+	people.Put("/parents/:id", c.PeopleController.UpdateParent)
+	people.Delete("/parents/:id", c.PeopleController.DeleteParent)
 	people.Post("/parents/link", c.PeopleController.LinkParentToStudent)
+
+	people.Post("/staff", c.PeopleController.CreateStaff)
+	people.Put("/staff/:id", c.PeopleController.UpdateStaff)
+	people.Get("/staff", c.PeopleController.GetStaff)
+	people.Delete("/staff/:id", c.PeopleController.DeleteStaff)
 
 	// Operations (protected)
 	ops := api.Group("/operations")
@@ -184,7 +199,14 @@ func (c *RouteConfig) SetupAuthRoute() {
 	ops.Put("/attendance/student/:id", c.OperationController.UpdateStudentAttendance)
 	ops.Get("/students/:student_id/attendance", c.OperationController.GetStudentAttendance)
 	ops.Get("/attendance", c.OperationController.GetAttendanceReport)
+	ops.Get("/attendance/section/:section_id/students", c.OperationController.GetSectionStudentsForAttendance)
+	ops.Post("/attendance/section", c.OperationController.RecordSectionAttendance)
 	ops.Post("/attendance/teacher", c.OperationController.RecordTeacherAttendance)
+	ops.Put("/attendance/teacher/:id", c.OperationController.UpdateTeacherAttendance)
+	ops.Get("/teachers/:teacher_id/attendance", c.OperationController.GetTeacherAttendance)
+	ops.Post("/attendance/staff", c.OperationController.RecordStaffAttendance)
+	ops.Put("/attendance/staff/:id", c.OperationController.UpdateStaffAttendance)
+	ops.Get("/staff/:employee_id/attendance", c.OperationController.GetStaffAttendance)
 
 	ops.Get("/notifications", c.OperationController.GetNotifications)
 	ops.Get("/report-card", c.OperationController.GetReportCard)

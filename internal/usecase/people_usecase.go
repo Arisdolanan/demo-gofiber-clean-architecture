@@ -34,9 +34,17 @@ type PeopleUsecase interface {
 	// Parents
 	CreateParent(ctx context.Context, parent *entity.Parent) error
 	UpdateParent(ctx context.Context, parent *entity.Parent) error
+	DeleteParent(ctx context.Context, id int64) error
 	GetParentByID(ctx context.Context, id int64) (*entity.Parent, error)
+	GetParentsBySchool(ctx context.Context, schoolID int64) ([]*entity.Parent, error)
 	LinkParentToStudent(ctx context.Context, link *entity.StudentParent) error
 	GetStudentParents(ctx context.Context, studentID int64) ([]*entity.Parent, error)
+
+	// Staff
+	CreateStaff(ctx context.Context, staff *entity.Staff) error
+	UpdateStaff(ctx context.Context, staff *entity.Staff) error
+	GetStaffBySchool(ctx context.Context, schoolID int64) ([]*entity.Staff, error)
+	DeleteStaff(ctx context.Context, id int64) error
 }
 
 type peopleUsecase struct {
@@ -143,10 +151,40 @@ func (uc *peopleUsecase) GetParentByID(ctx context.Context, id int64) (*entity.P
 	return uc.repo.FindParentByID(ctx, id)
 }
 
+func (uc *peopleUsecase) GetParentsBySchool(ctx context.Context, schoolID int64) ([]*entity.Parent, error) {
+	return uc.repo.FindParentsBySchool(ctx, schoolID)
+}
+
+func (uc *peopleUsecase) DeleteParent(ctx context.Context, id int64) error {
+	return uc.repo.DeleteParent(ctx, id)
+}
+
 func (uc *peopleUsecase) LinkParentToStudent(ctx context.Context, link *entity.StudentParent) error {
 	return uc.repo.LinkParentToStudent(ctx, link)
 }
 
 func (uc *peopleUsecase) GetStudentParents(ctx context.Context, studentID int64) ([]*entity.Parent, error) {
 	return uc.repo.GetStudentParents(ctx, studentID)
+}
+
+func (uc *peopleUsecase) CreateStaff(ctx context.Context, staff *entity.Staff) error {
+	if err := uc.validate.Struct(staff); err != nil {
+		return err
+	}
+	return uc.repo.CreateStaff(ctx, staff)
+}
+
+func (uc *peopleUsecase) UpdateStaff(ctx context.Context, staff *entity.Staff) error {
+	if err := uc.validate.Struct(staff); err != nil {
+		return err
+	}
+	return uc.repo.UpdateStaff(ctx, staff)
+}
+
+func (uc *peopleUsecase) GetStaffBySchool(ctx context.Context, schoolID int64) ([]*entity.Staff, error) {
+	return uc.repo.FindStaffBySchool(ctx, schoolID)
+}
+
+func (uc *peopleUsecase) DeleteStaff(ctx context.Context, id int64) error {
+	return uc.repo.DeleteStaff(ctx, id)
 }

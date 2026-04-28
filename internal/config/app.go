@@ -86,7 +86,7 @@ func Bootstrap(cfg *BootstrapConfig) {
 	rbacUsecase := usecase.NewRBACUsecase(roleRepo, permRepo, cfg.Validate, cfg.Log)
 	academicUsecase := usecase.NewAcademicUsecase(academicRepo, cfg.Validate, cfg.Log)
 	peopleUsecase := usecase.NewPeopleUsecase(peopleRepo, cfg.Validate, cfg.Log)
-	operationUsecase := usecase.NewOperationUsecase(operationRepo, cfg.Validate, cfg.Log)
+	operationUsecase := usecase.NewOperationUsecase(operationRepo, peopleRepo, cfg.Validate, cfg.Log)
 
 	// Initialize controller
 	authController := controllers.NewAuthController(authUsecase, cfg.Validate, cfg.Log)
@@ -100,6 +100,7 @@ func Bootstrap(cfg *BootstrapConfig) {
 	academicController := controllers.NewAcademicController(academicUsecase, cfg.Log)
 	peopleController := controllers.NewPeopleController(peopleUsecase, cfg.Log)
 	operationController := controllers.NewOperationController(operationUsecase, cfg.Log)
+	clientLogController := controllers.NewClientLogController(cfg.Log)
 
 	// Initialize middleware with blacklisting support
 	authMiddleware := middleware.JWTProtectedWithBlacklist(jwtSecret, authRedisRepo)
@@ -108,12 +109,12 @@ func Bootstrap(cfg *BootstrapConfig) {
 
 	// Setup routes
 	routeConfig := &route.RouteConfig{
-		App:             cfg.App,
-		AuthMiddleware:  authMiddleware,
-		AuthController:  authController,
-		EmailController: emailController,
-		UserController:  userController,
-		FileController:  fileController,
+		App:                 cfg.App,
+		AuthMiddleware:      authMiddleware,
+		AuthController:      authController,
+		EmailController:     emailController,
+		UserController:      userController,
+		FileController:      fileController,
 		PDFController:       pdfController,
 		ExcelController:     excelController,
 		SchoolController:    schoolController,
@@ -121,6 +122,7 @@ func Bootstrap(cfg *BootstrapConfig) {
 		AcademicController:  academicController,
 		PeopleController:    peopleController,
 		OperationController: operationController,
+		ClientLogController: clientLogController,
 	}
 	routeConfig.Setup()
 }

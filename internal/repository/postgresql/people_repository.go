@@ -33,16 +33,25 @@ type PeopleRepository interface {
 	// Parents
 	CreateParent(ctx context.Context, parent *entity.Parent) error
 	UpdateParent(ctx context.Context, parent *entity.Parent) error
+	DeleteParent(ctx context.Context, id int64) error
 	FindParentByID(ctx context.Context, id int64) (*entity.Parent, error)
+	FindParentsBySchool(ctx context.Context, schoolID int64) ([]*entity.Parent, error)
 	LinkParentToStudent(ctx context.Context, link *entity.StudentParent) error
 	IsStudentParent(ctx context.Context, studentID, parentUserID int64) (bool, error)
 	GetStudentParents(ctx context.Context, studentID int64) ([]*entity.Parent, error)
+
+	// Staff
+	CreateStaff(ctx context.Context, staff *entity.Staff) error
+	UpdateStaff(ctx context.Context, staff *entity.Staff) error
+	FindStaffBySchool(ctx context.Context, schoolID int64) ([]*entity.Staff, error)
+	DeleteStaff(ctx context.Context, id int64) error
 }
 
 type peopleRepository struct {
 	teacherRepo        *BaseRepository[entity.Teacher]
 	studentRepo        *BaseRepository[entity.Student]
 	parentRepo         *BaseRepository[entity.Parent]
+	staffRepo          *BaseRepository[entity.Staff]
 	studentSectionRepo *BaseRepository[entity.StudentSection]
 	studentParentRepo  *BaseRepository[entity.StudentParent]
 	db                 *sqlx.DB
@@ -53,6 +62,7 @@ func NewPeopleRepository(db *sqlx.DB) PeopleRepository {
 		teacherRepo:        NewBaseRepository[entity.Teacher](db, "teachers"),
 		studentRepo:        NewBaseRepository[entity.Student](db, "students"),
 		parentRepo:         NewBaseRepository[entity.Parent](db, "parents"),
+		staffRepo:          NewBaseRepository[entity.Staff](db, "staff"),
 		studentSectionRepo: NewBaseRepository[entity.StudentSection](db, "student_sections"),
 		studentParentRepo:  NewBaseRepository[entity.StudentParent](db, "student_parents"),
 		db:                 db,
@@ -159,6 +169,17 @@ func (r *peopleRepository) FindParentByID(ctx context.Context, id int64) (*entit
 	return r.parentRepo.FindByID(ctx, id)
 }
 
+func (r *peopleRepository) FindParentsBySchool(ctx context.Context, schoolID int64) ([]*entity.Parent, error) {
+	var parents []*entity.Parent
+	query := `SELECT * FROM parents WHERE school_id = $1 AND deleted_at IS NULL ORDER BY full_name`
+	err := r.db.SelectContext(ctx, &parents, query, schoolID)
+	return parents, err
+}
+
+func (r *peopleRepository) DeleteParent(ctx context.Context, id int64) error {
+	return r.parentRepo.SoftDelete(ctx, "id = $1 AND deleted_at IS NULL", id)
+}
+
 func (r *peopleRepository) LinkParentToStudent(ctx context.Context, link *entity.StudentParent) error {
 	return r.studentParentRepo.Create(ctx, link)
 }
@@ -183,4 +204,24 @@ func (r *peopleRepository) GetStudentParents(ctx context.Context, studentID int6
 	`
 	err := r.db.SelectContext(ctx, &parents, query, studentID)
 	return parents, err
+}
+
+// Staff methods
+func (r *peopleRepository) CreateStaff(ctx context.Context, staff *entity.Staff) error {
+	return r.staffRepo.Create(ctx, staff)
+}
+
+func (r *peopleRepository) UpdateStaff(ctx context.Context, staff *entity.Staff) error {
+	return r.staffRepo.Update(ctx, staff, "id = $1", staff.ID)
+}
+
+func (r *peopleRepository) FindStaffBySchool(ctx context.Context, schoolID int64) ([]*entity.Staff, error) {
+	var staff []*entity.Staff
+	query := `SELECT * FROM staff WHERE school_id = $1 AND deleted_at IS NULL ORDER BY full_name`
+	err := r.db.SelectContext(ctx, &staff, query, schoolID)
+	return staff, err
+}
+
+func (r *peopleRepository) DeleteStaff(ctx context.Context, id int64) error {
+	return r.staffRepo.SoftDelete(ctx, "id = $1", id)
 }

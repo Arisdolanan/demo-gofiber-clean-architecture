@@ -205,12 +205,21 @@ func (q *Query) Update(ctx context.Context, values map[string]any) error {
 		args = append(args, v)
 		i++
 	}
+	// Re-index placeholders in WHERE clause to follow SET placeholders
+	whereClause := q.where
+	if q.where != "" && len(q.args) > 0 {
+		for j := len(q.args); j >= 1; j-- {
+			oldPlaceholder := fmt.Sprintf("$%d", j)
+			newPlaceholder := fmt.Sprintf("$%d", j+i-1)
+			whereClause = strings.ReplaceAll(whereClause, oldPlaceholder, newPlaceholder)
+		}
+	}
 	args = append(args, q.args...)
 
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE %s",
 		q.table,
 		strings.Join(sets, ", "),
-		q.where,
+		whereClause,
 	)
 	_, err := q.db.Exec(ctx, query, args...)
 	return err

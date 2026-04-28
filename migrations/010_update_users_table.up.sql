@@ -3,7 +3,7 @@
 ALTER TABLE users 
 ADD COLUMN IF NOT EXISTS school_id BIGINT REFERENCES schools(id) ON DELETE SET NULL;
 
-CREATE TYPE user_type AS ENUM ('super_admin', 'admin', 'teacher', 'student', 'parent');
+CREATE TYPE user_type AS ENUM ('super_admin', 'admin', 'teacher', 'student', 'parent', 'staff');
 ALTER TABLE users 
 ADD COLUMN IF NOT EXISTS user_type user_type DEFAULT 'student';
 

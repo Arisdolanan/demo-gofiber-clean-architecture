@@ -35,9 +35,16 @@ type OperationUsecase interface {
 	RecordStudentAttendance(ctx context.Context, attendance *entity.StudentAttendance) error
 	UpdateStudentAttendance(ctx context.Context, attendance *entity.StudentAttendance) error
 	GetStudentAttendance(ctx context.Context, studentID int64, filters map[string]interface{}) ([]*entity.StudentAttendance, error)
-	GetAttendanceBySection(ctx context.Context, sectionID int64, date string) ([]*entity.StudentAttendance, error)
+	GetAttendanceBySection(ctx context.Context, sectionID int64, date string, subjectID *int64) ([]*entity.StudentAttendance, error)
 	GetAttendanceWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entity.StudentAttendance, error)
+	GetStudentsBySectionForAttendance(ctx context.Context, sectionID int64) ([]*entity.Student, error)
+	RecordSectionAttendance(ctx context.Context, req *entity.SectionAttendanceRequest) error
 	RecordTeacherAttendance(ctx context.Context, attendance *entity.TeacherAttendance) error
+	UpdateTeacherAttendance(ctx context.Context, attendance *entity.TeacherAttendance) error
+	GetTeacherAttendance(ctx context.Context, teacherID int64, filters map[string]interface{}) ([]*entity.TeacherAttendance, error)
+	RecordStaffAttendance(ctx context.Context, attendance *entity.StaffAttendance) error
+	UpdateStaffAttendance(ctx context.Context, attendance *entity.StaffAttendance) error
+	GetStaffAttendance(ctx context.Context, employeeID int64, filters map[string]interface{}) ([]*entity.StaffAttendance, error)
 
 	// Notifications
 	NotifyUser(ctx context.Context, notification *entity.Notification) error
@@ -49,16 +56,18 @@ type OperationUsecase interface {
 }
 
 type operationUsecase struct {
-	repo     postgresql.OperationRepository
-	validate *validator.Validate
-	log      *logrus.Logger
+	repo       postgresql.OperationRepository
+	peopleRepo postgresql.PeopleRepository
+	validate   *validator.Validate
+	log        *logrus.Logger
 }
 
-func NewOperationUsecase(repo postgresql.OperationRepository, validate *validator.Validate, log *logrus.Logger) OperationUsecase {
+func NewOperationUsecase(repo postgresql.OperationRepository, peopleRepo postgresql.PeopleRepository, validate *validator.Validate, log *logrus.Logger) OperationUsecase {
 	return &operationUsecase{
-		repo:     repo,
-		validate: validate,
-		log:      log,
+		repo:       repo,
+		peopleRepo: peopleRepo,
+		validate:   validate,
+		log:        log,
 	}
 }
 
@@ -155,12 +164,36 @@ func (uc *operationUsecase) GetStudentAttendance(ctx context.Context, studentID 
 	return uc.repo.GetStudentAttendance(ctx, studentID, filters)
 }
 
-func (uc *operationUsecase) GetAttendanceBySection(ctx context.Context, sectionID int64, date string) ([]*entity.StudentAttendance, error) {
-	return uc.repo.GetSectionAttendance(ctx, sectionID, date)
+func (uc *operationUsecase) GetAttendanceBySection(ctx context.Context, sectionID int64, date string, subjectID *int64) ([]*entity.StudentAttendance, error) {
+	return uc.repo.GetSectionAttendance(ctx, sectionID, date, subjectID)
 }
 
 func (uc *operationUsecase) GetAttendanceWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entity.StudentAttendance, error) {
 	return uc.repo.GetAttendanceWithFilters(ctx, filters)
+}
+
+func (uc *operationUsecase) GetStudentsBySectionForAttendance(ctx context.Context, sectionID int64) ([]*entity.Student, error) {
+	return uc.peopleRepo.GetStudentsBySection(ctx, sectionID)
+}
+
+func (uc *operationUsecase) RecordSectionAttendance(ctx context.Context, req *entity.SectionAttendanceRequest) error {
+	subjectID := req.SubjectID
+	for _, entry := range req.Attendances {
+		attendance := &entity.StudentAttendance{
+			StudentID:         entry.StudentID,
+			SectionID:         req.SectionID,
+			AcademicSessionID: req.AcademicSessionID,
+			SubjectID:         &subjectID,
+			AttendanceDate:    req.AttendanceDate,
+			Status:            entry.Status,
+			Notes:             entry.Notes,
+			MarkedBy:          req.MarkedBy,
+		}
+		if err := uc.repo.RecordStudentAttendance(ctx, attendance); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (uc *operationUsecase) RecordTeacherAttendance(ctx context.Context, attendance *entity.TeacherAttendance) error {
@@ -168,6 +201,35 @@ func (uc *operationUsecase) RecordTeacherAttendance(ctx context.Context, attenda
 		return err
 	}
 	return uc.repo.RecordTeacherAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) UpdateTeacherAttendance(ctx context.Context, attendance *entity.TeacherAttendance) error {
+	if err := uc.validate.Struct(attendance); err != nil {
+		return err
+	}
+	return uc.repo.UpdateTeacherAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) GetTeacherAttendance(ctx context.Context, teacherID int64, filters map[string]interface{}) ([]*entity.TeacherAttendance, error) {
+	return uc.repo.GetTeacherAttendance(ctx, teacherID, filters)
+}
+
+func (uc *operationUsecase) RecordStaffAttendance(ctx context.Context, attendance *entity.StaffAttendance) error {
+	if err := uc.validate.Struct(attendance); err != nil {
+		return err
+	}
+	return uc.repo.RecordStaffAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) UpdateStaffAttendance(ctx context.Context, attendance *entity.StaffAttendance) error {
+	if err := uc.validate.Struct(attendance); err != nil {
+		return err
+	}
+	return uc.repo.UpdateStaffAttendance(ctx, attendance)
+}
+
+func (uc *operationUsecase) GetStaffAttendance(ctx context.Context, employeeID int64, filters map[string]interface{}) ([]*entity.StaffAttendance, error) {
+	return uc.repo.GetStaffAttendance(ctx, employeeID, filters)
 }
 
 func (uc *operationUsecase) NotifyUser(ctx context.Context, notification *entity.Notification) error {

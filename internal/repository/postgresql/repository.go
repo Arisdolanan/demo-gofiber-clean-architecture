@@ -79,6 +79,13 @@ func (r *BaseRepository[T]) Update(ctx context.Context, entity *T, whereClause s
 	delete(values, "created_at")
 	delete(values, "created_by")
 
+	// Remove zero values to allow partial updates and avoid overwriting with defaults
+	for k, v := range values {
+		if reflect.ValueOf(v).IsZero() {
+			delete(values, k)
+		}
+	}
+
 	// Handle audit fields for entities that have them
 	if _, hasUpdatedAt := values["updated_at"]; hasUpdatedAt {
 		values["updated_at"] = time.Now()

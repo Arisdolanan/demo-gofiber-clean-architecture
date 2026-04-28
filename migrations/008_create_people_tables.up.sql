@@ -52,6 +52,10 @@ CREATE TABLE IF NOT EXISTS student_sections (
     UNIQUE(student_id, section_id, academic_session_id)
 );
 
+-- Add NIS and NISN columns to students table
+ALTER TABLE students ADD COLUMN nis VARCHAR(50) DEFAULT '';
+ALTER TABLE students ADD COLUMN nisn VARCHAR(50) DEFAULT '';
+
 -- Add foreign key back to sections for homeroom_teacher_id
 ALTER TABLE sections 
 ADD CONSTRAINT fk_sections_homeroom_teacher 

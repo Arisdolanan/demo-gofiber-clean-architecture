@@ -10,20 +10,20 @@ const (
 )
 
 type Teacher struct {
-	ID             int64          `json:"id" db:"id"`
-	UserID         int64          `json:"user_id" db:"user_id"`
-	SchoolID       int64          `json:"school_id" db:"school_id"`
-	EmployeeNumber string         `json:"employee_number" db:"employee_number" validate:"required"`
-	FullName       string         `json:"full_name" db:"full_name" validate:"required"`
-	DateOfBirth    *time.Time     `json:"date_of_birth,omitempty" db:"date_of_birth"`
-	Gender         string         `json:"gender" db:"gender"`
-	Phone          string         `json:"phone" db:"phone"`
-	Email          string         `json:"email" db:"email"`
-	Address        string         `json:"address" db:"address"`
-	Qualification  string         `json:"qualification" db:"qualification"`
-	Specialization string         `json:"specialization" db:"specialization"`
-	JoinDate       *time.Time     `json:"join_date,omitempty" db:"join_date"`
-	Status         TeacherStatus  `json:"status" db:"status"`
+	ID             int64         `json:"id" db:"id"`
+	UserID         int64         `json:"user_id" db:"user_id"`
+	SchoolID       int64         `json:"school_id" db:"school_id"`
+	EmployeeNumber string        `json:"employee_number" db:"employee_number" validate:"required"`
+	FullName       *string       `json:"full_name,omitempty" db:"full_name" validate:"required"`
+	DateOfBirth    *time.Time    `json:"date_of_birth,omitempty" db:"date_of_birth"`
+	Gender         *string       `json:"gender,omitempty" db:"gender"`
+	Phone          *string       `json:"phone,omitempty" db:"phone"`
+	Email          *string       `json:"email,omitempty" db:"email"`
+	Address        *string       `json:"address,omitempty" db:"address"`
+	Qualification  *string       `json:"qualification,omitempty" db:"qualification"`
+	Specialization *string       `json:"specialization,omitempty" db:"specialization"`
+	JoinDate       *time.Time    `json:"join_date,omitempty" db:"join_date"`
+	Status         TeacherStatus `json:"status" db:"status"`
 	BaseEntity
 }
 
@@ -37,31 +37,33 @@ const (
 )
 
 type Student struct {
-	ID            int64          `json:"id" db:"id"`
-	UserID        *int64         `json:"user_id,omitempty" db:"user_id"`
-	SchoolID      int64          `json:"school_id" db:"school_id"`
-	StudentNumber string         `json:"student_number" db:"student_number" validate:"required"`
-	FullName      string         `json:"full_name" db:"full_name" validate:"required"`
-	DateOfBirth   *time.Time     `json:"date_of_birth,omitempty" db:"date_of_birth"`
-	Gender        string         `json:"gender" db:"gender"`
-	BloodType     string         `json:"blood_type" db:"blood_type"`
-	Phone         string         `json:"phone" db:"phone"`
-	Email         string         `json:"email" db:"email"`
-	Address       string         `json:"address" db:"address"`
-	AdmissionDate *time.Time     `json:"admission_date,omitempty" db:"admission_date"`
-	Status        StudentStatus  `json:"status" db:"status"`
+	ID            int64         `json:"id" db:"id"`
+	UserID        *int64        `json:"user_id,omitempty" db:"user_id"`
+	SchoolID      int64         `json:"school_id" db:"school_id"`
+	StudentNumber string        `json:"student_number" db:"student_number" validate:"required"`
+	NIS           *string       `json:"nis,omitempty" db:"nis"`
+	NISN          *string       `json:"nisn,omitempty" db:"nisn"`
+	FullName      *string       `json:"full_name,omitempty" db:"full_name" validate:"required"`
+	DateOfBirth   *time.Time    `json:"date_of_birth,omitempty" db:"date_of_birth"`
+	Gender        *string       `json:"gender,omitempty" db:"gender"`
+	BloodType     *string       `json:"blood_type,omitempty" db:"blood_type"`
+	Phone         *string       `json:"phone,omitempty" db:"phone"`
+	Email         *string       `json:"email,omitempty" db:"email"`
+	Address       *string       `json:"address,omitempty" db:"address"`
+	AdmissionDate *time.Time    `json:"admission_date,omitempty" db:"admission_date"`
+	Status        StudentStatus `json:"status" db:"status"`
 	BaseEntity
 }
 
 type Parent struct {
-	ID         int64  `json:"id" db:"id"`
-	UserID     int64  `json:"user_id" db:"user_id"`
-	SchoolID   int64  `json:"school_id" db:"school_id"`
-	FullName   string `json:"full_name" db:"full_name" validate:"required"`
-	Phone      string `json:"phone" db:"phone"`
-	Email      string `json:"email" db:"email"`
-	Address    string `json:"address" db:"address"`
-	Occupation string `json:"occupation" db:"occupation"`
+	ID         int64   `json:"id" db:"id"`
+	UserID     int64   `json:"user_id" db:"user_id"`
+	SchoolID   int64   `json:"school_id" db:"school_id"`
+	FullName   *string `json:"full_name,omitempty" db:"full_name" validate:"required"`
+	Phone      *string `json:"phone,omitempty" db:"phone"`
+	Email      *string `json:"email,omitempty" db:"email"`
+	Address    *string `json:"address,omitempty" db:"address"`
+	Occupation *string `json:"occupation,omitempty" db:"occupation"`
 	BaseEntity
 }
 
@@ -79,8 +81,33 @@ type StudentSection struct {
 	StudentID         int64      `json:"student_id" db:"student_id"`
 	SectionID         int64      `json:"section_id" db:"section_id"`
 	AcademicSessionID int64      `json:"academic_session_id" db:"academic_session_id"`
-	RollNumber        string     `json:"roll_number" db:"roll_number"`
+	RollNumber        *string    `json:"roll_number,omitempty" db:"roll_number"`
 	EnrollmentDate    *time.Time `json:"enrollment_date,omitempty" db:"enrollment_date"`
-	Status            string     `json:"status" db:"status"` // active, promoted, transferred
+	Status            *string    `json:"status,omitempty" db:"status"` // active, promoted, transferred
+	BaseEntity
+}
+
+type StaffStatus string
+
+const (
+	StaffActive   StaffStatus = "active"
+	StaffInactive StaffStatus = "inactive"
+)
+
+type Staff struct {
+	ID             int64       `json:"id" db:"id"`
+	UserID         *int64      `json:"user_id,omitempty" db:"user_id"`
+	SchoolID       int64       `json:"school_id" db:"school_id"`
+	EmployeeNumber string      `json:"employee_number" db:"employee_number" validate:"required"`
+	FullName       *string     `json:"full_name,omitempty" db:"full_name" validate:"required"`
+	DateOfBirth    *time.Time  `json:"date_of_birth,omitempty" db:"date_of_birth"`
+	Gender         *string     `json:"gender,omitempty" db:"gender"`
+	Phone          *string     `json:"phone,omitempty" db:"phone"`
+	Email          *string     `json:"email,omitempty" db:"email"`
+	Address        *string     `json:"address,omitempty" db:"address"`
+	Position       *string     `json:"position,omitempty" db:"position"`
+	Department     *string     `json:"department,omitempty" db:"department"`
+	JoinDate       *time.Time  `json:"join_date,omitempty" db:"join_date"`
+	Status         StaffStatus `json:"status" db:"status"`
 	BaseEntity
 }

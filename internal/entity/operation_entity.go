@@ -1,6 +1,142 @@
 package entity
 
-import "time"
+import (
+	"database/sql/driver"
+	"fmt"
+	"strings"
+	"time"
+)
+
+// DateOnly represents a date without time for JSON and database operations
+type DateOnly struct {
+	time.Time
+}
+
+// UnmarshalJSON parses date in YYYY-MM-DD format
+func (d *DateOnly) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	if s == "null" {
+		d.Time = time.Time{}
+		return nil
+	}
+
+	// Try parsing as full datetime first
+	t, err := time.Parse(time.RFC3339, s)
+	if err == nil {
+		d.Time = t
+		return nil
+	}
+
+	// Try parsing as date only
+	t, err = time.Parse("2006-01-02", s)
+	if err != nil {
+		return err
+	}
+	d.Time = t
+	return nil
+}
+
+// MarshalJSON formats date as YYYY-MM-DD
+func (d DateOnly) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("\"%s\"", d.Time.Format("2006-01-02"))), nil
+}
+
+// Value implements driver.Valuer for database operations
+func (d DateOnly) Value() (driver.Value, error) {
+	return d.Time.Format("2006-01-02"), nil
+}
+
+// Scan implements sql.Scanner for database operations
+func (d *DateOnly) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case time.Time:
+		d.Time = v
+	case []byte:
+		t, err := time.Parse("2006-01-02", string(v))
+		if err != nil {
+			return err
+		}
+		d.Time = t
+	case string:
+		t, err := time.Parse("2006-01-02", v)
+		if err != nil {
+			return err
+		}
+		d.Time = t
+	default:
+		return fmt.Errorf("cannot scan %T into DateOnly", value)
+	}
+	return nil
+}
+
+// TimeOnly represents a time without date for JSON and database operations
+type TimeOnly struct {
+	time.Time
+}
+
+// UnmarshalJSON parses time in HH:MM:SS format
+func (t *TimeOnly) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	if s == "null" {
+		t.Time = time.Time{}
+		return nil
+	}
+
+	// Try parsing as full datetime first
+	parsed, err := time.Parse(time.RFC3339, s)
+	if err == nil {
+		t.Time = parsed
+		return nil
+	}
+
+	// Try parsing as time only (with seconds)
+	parsed, err = time.Parse("15:04:05", s)
+	if err == nil {
+		t.Time = parsed
+		return nil
+	}
+
+	// Try parsing as time only (without seconds)
+	parsed, err = time.Parse("15:04", s)
+	if err != nil {
+		return err
+	}
+	t.Time = parsed
+	return nil
+}
+
+// MarshalJSON formats time as HH:MM:SS
+func (t TimeOnly) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("\"%s\"", t.Time.Format("15:04:05"))), nil
+}
+
+// Value implements driver.Valuer for database operations
+func (t TimeOnly) Value() (driver.Value, error) {
+	return t.Time.Format("15:04:05"), nil
+}
+
+// Scan implements sql.Scanner for database operations
+func (t *TimeOnly) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case time.Time:
+		t.Time = v
+	case []byte:
+		parsed, err := time.Parse("15:04:05", string(v))
+		if err != nil {
+			return err
+		}
+		t.Time = parsed
+	case string:
+		parsed, err := time.Parse("15:04:05", v)
+		if err != nil {
+			return err
+		}
+		t.Time = parsed
+	default:
+		return fmt.Errorf("cannot scan %T into TimeOnly", value)
+	}
+	return nil
+}
 
 type Schedule struct {
 	ID                int64  `json:"id" db:"id"`
@@ -16,16 +152,16 @@ type Schedule struct {
 }
 
 type Exam struct {
-	ID                int64      `json:"id" db:"id"`
-	SectionID         int64      `json:"section_id" db:"section_id"`
-	SubjectID         int64      `json:"subject_id" db:"subject_id"`
-	AcademicSessionID int64      `json:"academic_session_id" db:"academic_session_id"`
-	Title             string     `json:"title" db:"title" validate:"required"`
-	Description       string     `json:"description" db:"description"`
-	ExamType          string     `json:"exam_type" db:"exam_type"` // daily, midterm, final, practice
-	ExamDate          time.Time  `json:"exam_date" db:"exam_date"`
-	DurationMinutes   int        `json:"duration_minutes" db:"duration_minutes"`
-	MaxScore          int        `json:"max_score" db:"max_score"`
+	ID                int64     `json:"id" db:"id"`
+	SectionID         int64     `json:"section_id" db:"section_id"`
+	SubjectID         int64     `json:"subject_id" db:"subject_id"`
+	AcademicSessionID int64     `json:"academic_session_id" db:"academic_session_id"`
+	Title             string    `json:"title" db:"title" validate:"required"`
+	Description       string    `json:"description" db:"description"`
+	ExamType          string    `json:"exam_type" db:"exam_type"` // daily, midterm, final, practice
+	ExamDate          time.Time `json:"exam_date" db:"exam_date"`
+	DurationMinutes   int       `json:"duration_minutes" db:"duration_minutes"`
+	MaxScore          int       `json:"max_score" db:"max_score"`
 	BaseEntity
 }
 
@@ -45,21 +181,72 @@ type StudentAttendance struct {
 	StudentID         int64      `json:"student_id" db:"student_id"`
 	SectionID         int64      `json:"section_id" db:"section_id"`
 	AcademicSessionID int64      `json:"academic_session_id" db:"academic_session_id"`
+	SubjectID         *int64     `json:"subject_id,omitempty" db:"subject_id"`
 	AttendanceDate    time.Time  `json:"attendance_date" db:"attendance_date"`
+	CheckInTime       *time.Time `json:"check_in_time,omitempty" db:"check_in_time"`
+	CheckOutTime      *time.Time `json:"check_out_time,omitempty" db:"check_out_time"`
 	Status            string     `json:"status" db:"status"` // present, absent, late, sick, permission
-	Notes             string     `json:"notes" db:"notes"`
+	Notes             *string    `json:"notes,omitempty" db:"notes"`
 	MarkedBy          *int64     `json:"marked_by,omitempty" db:"marked_by"` // Teacher ID
+	CheckInLocation   *string    `json:"check_in_location,omitempty" db:"check_in_location"`
+	CheckOutLocation  *string    `json:"check_out_location,omitempty" db:"check_out_location"`
+	CheckInIPAddress  *string    `json:"check_in_ip_address,omitempty" db:"check_in_ip_address"`
+	CheckOutIPAddress *string    `json:"check_out_ip_address,omitempty" db:"check_out_ip_address"`
+	
+	// Display fields (populated via JOIN)
+	StudentName   *string `json:"student_name,omitempty" db:"-"`
+	StudentNumber *string `json:"student_number,omitempty" db:"-"`
+	SubjectName   *string `json:"subject_name,omitempty" db:"-"`
+
 	BaseEntity
 }
 
+// StudentAttendanceEntry represents a single student's attendance entry in a bulk request
+type StudentAttendanceEntry struct {
+	StudentID int64   `json:"student_id"`
+	Status    string  `json:"status"` // present, absent, late, sick, permission
+	Notes     *string `json:"notes,omitempty"`
+}
+
+// SectionAttendanceRequest is used by teachers to record attendance for a whole section.
+// subject_id is required - it is mandatory supporting data, not a filter.
+type SectionAttendanceRequest struct {
+	SectionID         int64                    `json:"section_id"`
+	AcademicSessionID int64                    `json:"academic_session_id"`
+	SubjectID         int64                    `json:"subject_id"` // REQUIRED: must be filled by teacher before saving
+	AttendanceDate    time.Time                `json:"attendance_date"`
+	MarkedBy          *int64                   `json:"marked_by,omitempty"` // Teacher ID
+	Attendances       []StudentAttendanceEntry `json:"attendances"`
+}
+
+
 type TeacherAttendance struct {
-	ID             int64      `json:"id" db:"id"`
-	TeacherID      int64      `json:"teacher_id" db:"teacher_id"`
-	AttendanceDate time.Time  `json:"attendance_date" db:"attendance_date"`
-	CheckInTime    *time.Time `json:"check_in_time,omitempty" db:"check_in_time"`
-	CheckOutTime   *time.Time `json:"check_out_time,omitempty" db:"check_out_time"`
-	Status         string     `json:"status" db:"status"` // present, absent, late, sick, permission
-	Notes          string     `json:"notes" db:"notes"`
+	ID                int64      `json:"id" db:"id"`
+	TeacherID         int64      `json:"teacher_id" db:"teacher_id"`
+	AttendanceDate    time.Time  `json:"attendance_date" db:"attendance_date"`
+	CheckInTime       *time.Time `json:"check_in_time,omitempty" db:"check_in_time"`
+	CheckOutTime      *time.Time `json:"check_out_time,omitempty" db:"check_out_time"`
+	CheckInLocation   *string    `json:"check_in_location,omitempty" db:"check_in_location"`
+	CheckOutLocation  *string    `json:"check_out_location,omitempty" db:"check_out_location"`
+	CheckInIPAddress  *string    `json:"check_in_ip_address,omitempty" db:"check_in_ip_address"`
+	CheckOutIPAddress *string    `json:"check_out_ip_address,omitempty" db:"check_out_ip_address"`
+	Status            string     `json:"status" db:"status"` // present, absent, late, sick, permission
+	Notes             *string    `json:"notes,omitempty" db:"notes"`
+	BaseEntity
+}
+
+type StaffAttendance struct {
+	ID                int64      `json:"id" db:"id"`
+	EmployeeID        int64      `json:"employee_id" db:"employee_id"`
+	AttendanceDate    time.Time  `json:"attendance_date" db:"attendance_date"`
+	CheckInTime       *time.Time `json:"check_in_time,omitempty" db:"check_in_time"`
+	CheckOutTime      *time.Time `json:"check_out_time,omitempty" db:"check_out_time"`
+	CheckInLocation   *string    `json:"check_in_location,omitempty" db:"check_in_location"`
+	CheckOutLocation  *string    `json:"check_out_location,omitempty" db:"check_out_location"`
+	CheckInIPAddress  *string    `json:"check_in_ip_address,omitempty" db:"check_in_ip_address"`
+	CheckOutIPAddress *string    `json:"check_out_ip_address,omitempty" db:"check_out_ip_address"`
+	Status            string     `json:"status" db:"status"` // present, absent, late, sick, permission
+	Notes             *string    `json:"notes,omitempty" db:"notes"`
 	BaseEntity
 }
 

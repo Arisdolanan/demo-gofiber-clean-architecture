@@ -31,6 +31,8 @@ type AcademicUsecase interface {
 	DeleteSection(ctx context.Context, id int64) error
 	GetSectionByID(ctx context.Context, id int64) (*entity.Section, error)
 	GetSectionsByClass(ctx context.Context, classID int64) ([]*entity.Section, error)
+	GetSectionsBySession(ctx context.Context, sessionID int64) ([]*entity.Section, error)
+	GetAllSections(ctx context.Context) ([]*entity.Section, error)
 
 	// Subjects
 	CreateSubject(ctx context.Context, subject *entity.Subject) error
@@ -134,6 +136,14 @@ func (uc *academicUsecase) GetSectionByID(ctx context.Context, id int64) (*entit
 
 func (uc *academicUsecase) GetSectionsByClass(ctx context.Context, classID int64) ([]*entity.Section, error) {
 	return uc.repo.FindSectionsByClass(ctx, classID)
+}
+
+func (uc *academicUsecase) GetSectionsBySession(ctx context.Context, sessionID int64) ([]*entity.Section, error) {
+	return uc.repo.FindSectionsBySession(ctx, sessionID)
+}
+
+func (uc *academicUsecase) GetAllSections(ctx context.Context) ([]*entity.Section, error) {
+	return uc.repo.FindAllSections(ctx)
 }
 
 func (uc *academicUsecase) CreateSubject(ctx context.Context, subject *entity.Subject) error {

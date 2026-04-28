@@ -64,44 +64,53 @@ END $$;
 
 -- ============================================
 -- 4. SAMPLE USERS
--- Note: Password for all users is "password123" 
--- Using bcrypt hash: $2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq
+-- Note: Password for all users is "@SuperIndo1" 
+-- Using bcrypt hash: $2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC
 -- Using ON CONFLICT DO NOTHING to handle re-runs
 -- ============================================
 
 -- Admin User
 INSERT INTO users (email, password, username, user_type, email_verified_at) VALUES
-('admin@sman1jakarta.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'admin', 'super_admin', CURRENT_TIMESTAMP)
+('admin@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'admin', 'super_admin', CURRENT_TIMESTAMP)
 ON CONFLICT (username) DO NOTHING;
 
 -- Teachers (5 teachers)
 INSERT INTO users (email, password, username, user_type, email_verified_at) VALUES
-('budi.santoso@sman1jakarta.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'budi.santoso', 'teacher', CURRENT_TIMESTAMP),
-('siti.aminah@sman1jakarta.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'siti.aminah', 'teacher', CURRENT_TIMESTAMP),
-('agus.pratama@sman1jakarta.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'agus.pratama', 'teacher', CURRENT_TIMESTAMP),
-('ani.wijaya@sman1jakarta.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'ani.wijaya', 'teacher', CURRENT_TIMESTAMP),
-('joko.susilo@sman1jakarta.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'joko.susilo', 'teacher', CURRENT_TIMESTAMP)
+('budi.santoso@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'budi.santoso', 'teacher', CURRENT_TIMESTAMP),
+('siti.aminah@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'siti.aminah', 'teacher', CURRENT_TIMESTAMP),
+('agus.pratama@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'agus.pratama', 'teacher', CURRENT_TIMESTAMP),
+('ani.wijaya@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'ani.wijaya', 'teacher', CURRENT_TIMESTAMP),
+('joko.susilo@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'joko.susilo', 'teacher', CURRENT_TIMESTAMP)
 ON CONFLICT (username) DO NOTHING;
 
 -- Students (10 students for testing)
 INSERT INTO users (email, password, username, user_type, email_verified_at) VALUES
-('aditya.perkasa@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'aditya.perkasa', 'student', CURRENT_TIMESTAMP),
-('bunga.citra@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'bunga.citra', 'student', CURRENT_TIMESTAMP),
-('chandra.wijaya@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'chandra.wijaya', 'student', CURRENT_TIMESTAMP),
-('dewi.sartika@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'dewi.sartika', 'student', CURRENT_TIMESTAMP),
-('eko.prasetyo@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'eko.prasetyo', 'student', CURRENT_TIMESTAMP),
-('fani.rahmawati@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'fani.rahmawati', 'student', CURRENT_TIMESTAMP),
-('guntur.prabowo@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'guntur.prabowo', 'student', CURRENT_TIMESTAMP),
-('hana.pertiwi@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'hana.pertiwi', 'student', CURRENT_TIMESTAMP),
-('indra.lesmana@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'indra.lesmana', 'student', CURRENT_TIMESTAMP),
-('juli.anissa@student.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'juli.anissa', 'student', CURRENT_TIMESTAMP)
+('aditya.perkasa@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'aditya.perkasa', 'student', CURRENT_TIMESTAMP),
+('bunga.citra@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'bunga.citra', 'student', CURRENT_TIMESTAMP),
+('chandra.wijaya@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'chandra.wijaya', 'student', CURRENT_TIMESTAMP),
+('dewi.sartika@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'dewi.sartika', 'student', CURRENT_TIMESTAMP),
+('eko.prasetyo@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'eko.prasetyo', 'student', CURRENT_TIMESTAMP),
+('fani.rahmawati@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'fani.rahmawati', 'student', CURRENT_TIMESTAMP),
+('guntur.prabowo@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'guntur.prabowo', 'student', CURRENT_TIMESTAMP),
+('hana.pertiwi@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'hana.pertiwi', 'student', CURRENT_TIMESTAMP),
+('indra.lesmana@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'indra.lesmana', 'student', CURRENT_TIMESTAMP),
+('juli.anissa@student.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'juli.anissa', 'student', CURRENT_TIMESTAMP)
 ON CONFLICT (username) DO NOTHING;
 
 -- Parents (3 parents)
 INSERT INTO users (email, password, username, user_type, email_verified_at) VALUES
-('orangtua1@parent.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'orangtua1', 'parent', CURRENT_TIMESTAMP),
-('orangtua2@parent.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'orangtua2', 'parent', CURRENT_TIMESTAMP),
-('orangtua3@parent.sch.id', '$2a$10$YQbqHqZxqZxqZxqZxqZxqOqZxqZxqZxqZxqZxqZxqZxqZxqZxqZxq', 'orangtua3', 'parent', CURRENT_TIMESTAMP)
+('orangtua1@parent.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'orangtua1', 'parent', CURRENT_TIMESTAMP),
+('orangtua2@parent.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'orangtua2', 'parent', CURRENT_TIMESTAMP),
+('orangtua3@parent.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'orangtua3', 'parent', CURRENT_TIMESTAMP)
+ON CONFLICT (username) DO NOTHING;
+
+-- Staff (5 staff members)
+INSERT INTO users (email, password, username, user_type, email_verified_at) VALUES
+('kepala.sekolah@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'kepala.sekolah', 'staff', CURRENT_TIMESTAMP),
+('admin.tu@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'admin.tu', 'staff', CURRENT_TIMESTAMP),
+('operator@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'operator', 'staff', CURRENT_TIMESTAMP),
+('pustakawan@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'pustakawan', 'staff', CURRENT_TIMESTAMP),
+('konselor@sman1jakarta.sch.id', '$2a$10$lY6rsGhNtb4DkVf1ihy4hu6nowyLJu4YWWkWKNSMsqrsrSW31HepC', 'konselor', 'staff', CURRENT_TIMESTAMP)
 ON CONFLICT (username) DO NOTHING;
 
 -- ============================================
@@ -236,6 +245,12 @@ INSERT INTO student_parents (student_id, parent_id, relationship, is_primary) VA
 (3, 3, 'father', true);   -- Chandra - Bapak Wijaya
 
 -- ============================================
+-- 13b. STAFF DATA - MOVED TO MIGRATION 013
+-- Staff seed data is in migration 013 (after table creation)
+-- to avoid "relation does not exist" error
+-- ============================================
+
+-- ============================================
 -- 14. SCHEDULES (Jadwal Pelajaran)
 -- Match frontend mock schedules
 -- ============================================
@@ -334,7 +349,8 @@ INSERT INTO roles (code, name, description) VALUES
 ('school_admin', 'school_admin', 'School Administrator'),
 ('teacher', 'teacher', 'Teacher'),
 ('student', 'student', 'Student'),
-('parent', 'parent', 'Parent/Guardian')
+('parent', 'parent', 'Parent/Guardian'),
+('staff', 'staff', 'School Staff')
 ON CONFLICT (school_id, code) DO NOTHING;
 
 -- ============================================
@@ -451,4 +467,72 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (16, 4), -- Juli Anissa = Student
 (17, 5), -- Bapak Heru = Parent
 (18, 5), -- Ibu Citra = Parent
-(19, 5); -- Bapak Wijaya = Parent
+(19, 5), -- Bapak Wijaya = Parent
+(20, 6), -- Dr. Ahmad Dahlan = Staff
+(21, 6), -- Sri Wahyuni = Staff
+(22, 6), -- Rudi Hartono = Staff
+(23, 6), -- Dewi Lestari = Staff
+(24, 6); -- Hendra Kurniawan = Staff
+
+-- ============================================
+-- 24. STAFF DATA
+-- Insert staff records (Table created in migration 011)
+-- ============================================
+
+-- Insert staff data
+INSERT INTO staff (user_id, school_id, employee_number, full_name, date_of_birth, gender, phone, email, address, position, department, join_date, status) VALUES
+(20, 1, 'STF-001', 'Dr. H. Ahmad Dahlan, M.Pd', '1975-08-17', 'male', '081234567895', 'kepala.sekolah@sman1jakarta.sch.id', 'Jakarta', 'Kepala Sekolah', 'Management', '2000-01-01', 'active'),
+(21, 1, 'STF-002', 'Sri Wahyuni, S.Admin', '1988-04-12', 'female', '081234567896', 'admin.tu@sman1jakarta.sch.id', 'Jakarta', 'Admin TU', 'Administration', '2015-06-01', 'active'),
+(22, 1, 'STF-003', 'Rudi Hartono', '1995-09-25', 'male', '081234567897', 'operator@sman1jakarta.sch.id', 'Jakarta', 'Operator Sekolah', 'IT', '2020-07-15', 'active'),
+(23, 1, 'STF-004', 'Dewi Lestari, S.IP', '1990-12-03', 'female', '081234567898', 'pustakawan@sman1jakarta.sch.id', 'Jakarta', 'Pustakawan', 'Library', '2018-08-01', 'active'),
+(24, 1, 'STF-005', 'Hendra Kurniawan, S.Pd', '1987-06-30', 'male', '081234567899', 'konselor@sman1jakarta.sch.id', 'Jakarta', 'Konselor', 'Counseling', '2016-01-10', 'active')
+ON CONFLICT (school_id, employee_number) DO NOTHING;
+
+-- Up Migration: Seed Attendance Test Data and Enhance Schema
+-- This migration adds subject_id to student_attendance and provides fresh seed data for testing
+
+-- 1. Enhance student_attendance with subject_id
+ALTER TABLE student_attendance 
+    ADD COLUMN IF NOT EXISTS subject_id BIGINT REFERENCES subjects(id) ON DELETE SET NULL;
+
+-- 2. Update unique constraint to allow multiple attendance records per day for different subjects
+-- First drop the old constraint if it exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'student_attendance_student_id_section_id_attendance_date_key') THEN
+        ALTER TABLE student_attendance DROP CONSTRAINT student_attendance_student_id_section_id_attendance_date_key;
+    END IF;
+END $$;
+
+-- Add new constraint including subject_id (nullable for daily attendance)
+-- We use a unique index with NULL handling or just include it
+CREATE UNIQUE INDEX IF NOT EXISTS idx_student_attendance_unique_subject 
+    ON student_attendance (student_id, section_id, COALESCE(subject_id, 0), attendance_date);
+
+-- 3. Fresh Seed Data for 2024/2025 Session
+INSERT INTO academic_sessions (school_id, name, start_date, end_date, is_active)
+VALUES (1, '2024/2025', '2024-07-01', '2025-06-30', true)
+ON CONFLICT DO NOTHING;
+
+-- 4. Ensure Subjects exist
+INSERT INTO subjects (school_id, name, code) VALUES
+(1, 'Matematika Terapan', 'MTK-2024'),
+(1, 'Fisika Lanjutan', 'FIS-2024'),
+(1, 'Bahasa Inggris Business', 'ENG-2024')
+ON CONFLICT (school_id, code) DO NOTHING;
+
+-- 5. Link more students to sections for testing
+DO $$
+DECLARE
+    v_session_id BIGINT;
+    v_section_id BIGINT;
+    v_student_start_id BIGINT;
+BEGIN
+    SELECT id INTO v_session_id FROM academic_sessions WHERE name = '2024/2025' LIMIT 1;
+    SELECT id INTO v_section_id FROM sections WHERE code = 'X-A' LIMIT 1;
+    
+    -- Ensure we have students (Aditya, Bunga, etc. are already there from 012)
+    -- Just ensure they are enrolled in the new session and section if needed
+    -- For testing, we'll just use the existing student-section links but ensure they are active
+    UPDATE student_sections SET academic_session_id = v_session_id WHERE section_id = v_section_id;
+END $$;

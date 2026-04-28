@@ -298,7 +298,31 @@ func (c *AcademicController) DeleteSection(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/academic/sections [get]
 func (c *AcademicController) GetSections(ctx *fiber.Ctx) error {
-	classID, err := utils.ParseInt64(ctx.Query("class_id"))
+	classIDStr := ctx.Query("class_id")
+	sessionIDStr := ctx.Query("academic_session_id")
+
+	// If no filters are provided, return all sections
+	if classIDStr == "" && sessionIDStr == "" {
+		sections, err := c.usecase.GetAllSections(ctx.Context())
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+		}
+		return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Sections retrieved successfully", Data: sections})
+	}
+
+	if sessionIDStr != "" {
+		sessionID, err := utils.ParseInt64(sessionIDStr)
+		if err != nil {
+			return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Session ID"})
+		}
+		sections, err := c.usecase.GetSectionsBySession(ctx.Context(), sessionID)
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+		}
+		return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Sections retrieved successfully", Data: sections})
+	}
+
+	classID, err := utils.ParseInt64(classIDStr)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Class ID"})
 	}
@@ -389,8 +413,8 @@ func (c *AcademicController) DeleteSubject(ctx *fiber.Ctx) error {
 // @Router /api/v1/academic/subjects [get]
 func (c *AcademicController) GetSubjects(ctx *fiber.Ctx) error {
 	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
+	if err != nil || schoolID == 0 {
+		schoolID = 1 // default to first school
 	}
 
 	subjects, err := c.usecase.GetSubjectsBySchool(ctx.Context(), schoolID)

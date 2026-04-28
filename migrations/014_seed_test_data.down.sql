@@ -99,7 +99,7 @@ DELETE FROM academic_sessions WHERE school_id = 1;
 -- ============================================
 -- 20. USERS (Admin, Teachers, Students, Parents)
 -- ============================================
-DELETE FROM users WHERE user_type IN ('teacher', 'student', 'parent');
+DELETE FROM users WHERE user_type IN ('teacher', 'student', 'parent','staff');
 
 -- ============================================
 -- 21. SCHOOL LICENSES
@@ -116,3 +116,9 @@ DELETE FROM app_packages WHERE code IN ('PKG-BASIC', 'PKG-PRO', 'PKG-ENTERPRISE'
 -- Keep school data to allow re-migration
 -- ============================================
 -- DELETE FROM schools WHERE code = 'SCH001';
+
+-- ============================================
+-- 24. STAFF TABLE
+-- ============================================
+DROP TABLE IF EXISTS staff CASCADE;
+DROP TYPE IF EXISTS staff_status;

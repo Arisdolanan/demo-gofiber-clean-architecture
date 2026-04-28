@@ -303,6 +303,76 @@ func (c *PeopleController) CreateParent(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{Status: fiber.StatusCreated, Message: "Parent created successfully"})
 }
 
+// GetParents retrieves all parents for a school
+// @Summary Get parents
+// @Tags people
+// @Produce json
+// @Param school_id query int true "School ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/people/parents [get]
+func (c *PeopleController) GetParents(ctx *fiber.Ctx) error {
+	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
+	}
+
+	parents, err := c.usecase.GetParentsBySchool(ctx.Context(), schoolID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parents retrieved successfully", Data: parents})
+}
+
+// UpdateParent handles parent updates
+// @Summary Update parent
+// @Tags people
+// @Accept json
+// @Produce json
+// @Param id path int true "Parent ID"
+// @Param parent body entity.Parent true "Parent details"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Failure 400 {object} response.HTTPErrorResponse
+// @Router /api/v1/people/parents/{id} [put]
+func (c *PeopleController) UpdateParent(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Parent ID"})
+	}
+
+	var parent entity.Parent
+	if err := ctx.BodyParser(&parent); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+	parent.ID = id
+
+	if err := c.usecase.UpdateParent(ctx.Context(), &parent); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parent updated successfully"})
+}
+
+// DeleteParent handles parent deletion
+// @Summary Delete parent
+// @Tags people
+// @Param id path int true "Parent ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Failure 400 {object} response.HTTPErrorResponse
+// @Router /api/v1/people/parents/{id} [delete]
+func (c *PeopleController) DeleteParent(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Parent ID"})
+	}
+
+	if err := c.usecase.DeleteParent(ctx.Context(), id); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parent deleted successfully"})
+}
+
 // LinkParentToStudent links a parent to a student
 // @Summary Link parent to student
 // @Tags people
@@ -322,4 +392,96 @@ func (c *PeopleController) LinkParentToStudent(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parent linked to student successfully"})
+}
+
+// CreateStaff handles staff onboarding
+// @Summary Create school staff
+// @Tags people
+// @Accept json
+// @Produce json
+// @Param staff body entity.Staff true "Staff details"
+// @Success 201 {object} response.HTTPSuccessResponse
+// @Failure 400 {object} response.HTTPErrorResponse
+// @Router /api/v1/people/staff [post]
+func (c *PeopleController) CreateStaff(ctx *fiber.Ctx) error {
+	var staff entity.Staff
+	if err := ctx.BodyParser(&staff); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+
+	if err := c.usecase.CreateStaff(ctx.Context(), &staff); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{Status: fiber.StatusCreated, Message: "Staff created successfully"})
+}
+
+// UpdateStaff handles staff updates
+// @Summary Update school staff
+// @Tags people
+// @Accept json
+// @Produce json
+// @Param id path int true "Staff ID"
+// @Param staff body entity.Staff true "Staff details"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Failure 400 {object} response.HTTPErrorResponse
+// @Router /api/v1/people/staff/{id} [put]
+func (c *PeopleController) UpdateStaff(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Staff ID"})
+	}
+
+	var staff entity.Staff
+	if err := ctx.BodyParser(&staff); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+	staff.ID = id
+
+	if err := c.usecase.UpdateStaff(ctx.Context(), &staff); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff updated successfully"})
+}
+
+// GetStaff retrieves all staff for a school
+// @Summary Get staff
+// @Tags people
+// @Produce json
+// @Param school_id query int true "School ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/people/staff [get]
+func (c *PeopleController) GetStaff(ctx *fiber.Ctx) error {
+	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
+	}
+
+	staff, err := c.usecase.GetStaffBySchool(ctx.Context(), schoolID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff retrieved successfully", Data: staff})
+}
+
+// DeleteStaff handles staff deletion
+// @Summary Delete school staff
+// @Tags people
+// @Param id path int true "Staff ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Failure 400 {object} response.HTTPErrorResponse
+// @Router /api/v1/people/staff/{id} [delete]
+func (c *PeopleController) DeleteStaff(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Staff ID"})
+	}
+
+	if err := c.usecase.DeleteStaff(ctx.Context(), id); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff deleted successfully"})
 }

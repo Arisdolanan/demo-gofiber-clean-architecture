@@ -29,6 +29,8 @@ type AcademicRepository interface {
 	DeleteSection(ctx context.Context, id int64) error
 	FindSectionByID(ctx context.Context, id int64) (*entity.Section, error)
 	FindSectionsByClass(ctx context.Context, classID int64) ([]*entity.Section, error)
+	FindSectionsBySession(ctx context.Context, sessionID int64) ([]*entity.Section, error)
+	FindAllSections(ctx context.Context) ([]*entity.Section, error)
 
 	// Subjects
 	CreateSubject(ctx context.Context, subject *entity.Subject) error
@@ -116,6 +118,14 @@ func (r *academicRepository) FindSectionByID(ctx context.Context, id int64) (*en
 
 func (r *academicRepository) FindSectionsByClass(ctx context.Context, classID int64) ([]*entity.Section, error) {
 	return r.sectionRepo.FindAll(ctx, "class_id = $1 AND deleted_at IS NULL", classID)
+}
+
+func (r *academicRepository) FindSectionsBySession(ctx context.Context, sessionID int64) ([]*entity.Section, error) {
+	return r.sectionRepo.FindAll(ctx, "academic_session_id = $1 AND deleted_at IS NULL", sessionID)
+}
+
+func (r *academicRepository) FindAllSections(ctx context.Context) ([]*entity.Section, error) {
+	return r.sectionRepo.FindAll(ctx, "deleted_at IS NULL")
 }
 
 func (r *academicRepository) CreateSubject(ctx context.Context, subject *entity.Subject) error {

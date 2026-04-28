@@ -280,6 +280,17 @@ func (c *OperationController) RecordStudentAttendance(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
+	// Debug: Log parsed data
+	c.log.WithContext(ctx.Context()).Infof("=== STUDENT ATTENDANCE DEBUG ===")
+	c.log.WithContext(ctx.Context()).Infof("Student ID: %d", attendance.StudentID)
+	c.log.WithContext(ctx.Context()).Infof("Section ID: %d", attendance.SectionID)
+	c.log.WithContext(ctx.Context()).Infof("Academic Session ID: %d", attendance.AcademicSessionID)
+	c.log.WithContext(ctx.Context()).Infof("Attendance Date: %v", attendance.AttendanceDate)
+	c.log.WithContext(ctx.Context()).Infof("Status: %s", attendance.Status)
+	c.log.WithContext(ctx.Context()).Infof("Notes: %v", attendance.Notes)
+	c.log.WithContext(ctx.Context()).Infof("CheckInIPAddress: %v", attendance.CheckInIPAddress)
+	c.log.WithContext(ctx.Context()).Infof("================================")
+
 	if err := c.usecase.RecordStudentAttendance(ctx.Context(), &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -356,11 +367,19 @@ func (c *OperationController) GetStudentAttendance(ctx *fiber.Ctx) error {
 // @Router /api/v1/operations/attendance [get]
 func (c *OperationController) GetAttendanceReport(ctx *fiber.Ctx) error {
 	sectionIDStr := ctx.Query("section_id")
+	sessionIDStr := ctx.Query("academic_session_id")
+	subjectIDStr := ctx.Query("subject_id")
 	date := ctx.Query("date")
 
 	if sectionIDStr != "" && date != "" {
 		sectionID, _ := utils.ParseInt64(sectionIDStr)
-		attendance, err := c.usecase.GetAttendanceBySection(ctx.Context(), sectionID, date)
+		var subjectID *int64
+		if subjectIDStr != "" && subjectIDStr != "null" {
+			sid, _ := utils.ParseInt64(subjectIDStr)
+			subjectID = &sid
+		}
+		
+		attendance, err := c.usecase.GetAttendanceBySection(ctx.Context(), sectionID, date, subjectID)
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 		}
@@ -370,6 +389,9 @@ func (c *OperationController) GetAttendanceReport(ctx *fiber.Ctx) error {
 	filters := make(map[string]interface{})
 	if sectionIDStr != "" {
 		filters["section_id"] = sectionIDStr
+	}
+	if sessionIDStr != "" {
+		filters["academic_session_id"] = sessionIDStr
 	}
 	if date != "" {
 		filters["date"] = date
@@ -381,6 +403,68 @@ func (c *OperationController) GetAttendanceReport(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Attendance report retrieved successfully", Data: attendance})
+}
+
+// GetSectionStudentsForAttendance retrieves students in a section for attendance marking by teacher
+// @Summary Get students in a section for attendance
+// @Tags operations
+// @Produce json
+// @Param section_id path int true "Section ID"
+// @Param academic_session_id query int false "Academic Session ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/attendance/section/{section_id}/students [get]
+func (c *OperationController) GetSectionStudentsForAttendance(ctx *fiber.Ctx) error {
+	sectionID, err := utils.ParseInt64FromParam(ctx, "section_id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Section ID"})
+	}
+
+	students, err := c.usecase.GetStudentsBySectionForAttendance(ctx.Context(), sectionID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Students retrieved successfully", Data: students})
+}
+
+// RecordSectionAttendance records attendance for all students in a section
+// This endpoint requires subject_id as mandatory supporting data before saving
+// @Summary Record attendance for all students in a section
+// @Tags operations
+// @Accept json
+// @Produce json
+// @Param body body entity.SectionAttendanceRequest true "Section attendance with required subject_id"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/attendance/section [post]
+func (c *OperationController) RecordSectionAttendance(ctx *fiber.Ctx) error {
+	var req entity.SectionAttendanceRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+
+	// Validate required fields
+	if req.SectionID == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "section_id is required"})
+	}
+	if req.AcademicSessionID == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "academic_session_id is required"})
+	}
+	if req.SubjectID == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "subject_id wajib diisi sebelum menyimpan absensi"})
+	}
+	if len(req.Attendances) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Data absensi siswa tidak boleh kosong"})
+	}
+
+	c.log.WithContext(ctx.Context()).Infof("=== SECTION ATTENDANCE DEBUG ===")
+	c.log.WithContext(ctx.Context()).Infof("Section ID: %d, Session ID: %d, Subject ID: %d", req.SectionID, req.AcademicSessionID, req.SubjectID)
+	c.log.WithContext(ctx.Context()).Infof("Total students: %d", len(req.Attendances))
+
+	if err := c.usecase.RecordSectionAttendance(ctx.Context(), &req); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Absensi seksi berhasil disimpan"})
 }
 
 // RecordTeacherAttendance handles teacher attendance logging
@@ -397,11 +481,160 @@ func (c *OperationController) RecordTeacherAttendance(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
+	// Debug: Log parsed data
+	c.log.WithContext(ctx.Context()).Infof("=== TEACHER ATTENDANCE DEBUG ===")
+	c.log.WithContext(ctx.Context()).Infof("Teacher ID: %d", attendance.TeacherID)
+	c.log.WithContext(ctx.Context()).Infof("Attendance Date: %v", attendance.AttendanceDate)
+	c.log.WithContext(ctx.Context()).Infof("CheckInTime: %v", attendance.CheckInTime)
+	c.log.WithContext(ctx.Context()).Infof("CheckOutTime: %v", attendance.CheckOutTime)
+	c.log.WithContext(ctx.Context()).Infof("Status: %s", attendance.Status)
+	c.log.WithContext(ctx.Context()).Infof("CheckInIPAddress: %v", attendance.CheckInIPAddress)
+	c.log.WithContext(ctx.Context()).Infof("================================")
+
 	if err := c.usecase.RecordTeacherAttendance(ctx.Context(), &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Teacher attendance recorded successfully"})
+}
+
+// UpdateTeacherAttendance handles teacher attendance updates
+// @Summary Update teacher attendance
+// @Tags operations
+// @Accept json
+// @Produce json
+// @Param id path int true "Attendance ID"
+// @Param attendance body entity.TeacherAttendance true "Attendance details"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/attendance/teacher/{id} [put]
+func (c *OperationController) UpdateTeacherAttendance(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Attendance ID"})
+	}
+
+	var attendance entity.TeacherAttendance
+	if err := ctx.BodyParser(&attendance); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+	attendance.ID = id
+
+	if err := c.usecase.UpdateTeacherAttendance(ctx.Context(), &attendance); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Teacher attendance updated successfully"})
+}
+
+// GetTeacherAttendance retrieves attendance history for a teacher
+// @Summary Get teacher attendance history
+// @Tags operations
+// @Produce json
+// @Param teacher_id path int true "Teacher ID"
+// @Param start_date query string false "Start Date (YYYY-MM-DD)"
+// @Param end_date query string false "End Date (YYYY-MM-DD)"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/teachers/{teacher_id}/attendance [get]
+func (c *OperationController) GetTeacherAttendance(ctx *fiber.Ctx) error {
+	teacherID, err := utils.ParseInt64FromParam(ctx, "teacher_id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Teacher ID"})
+	}
+
+	filters := make(map[string]interface{})
+	if sd := ctx.Query("start_date"); sd != "" {
+		filters["start_date"] = sd
+	}
+	if ed := ctx.Query("end_date"); ed != "" {
+		filters["end_date"] = ed
+	}
+
+	attendance, err := c.usecase.GetTeacherAttendance(ctx.Context(), teacherID, filters)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Teacher attendance retrieved successfully", Data: attendance})
+}
+
+// RecordStaffAttendance handles staff attendance logging
+// @Summary Record staff attendance
+// @Tags operations
+// @Accept json
+// @Produce json
+// @Param attendance body entity.StaffAttendance true "Attendance details"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/attendance/staff [post]
+func (c *OperationController) RecordStaffAttendance(ctx *fiber.Ctx) error {
+	var attendance entity.StaffAttendance
+	if err := ctx.BodyParser(&attendance); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+
+	if err := c.usecase.RecordStaffAttendance(ctx.Context(), &attendance); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff attendance recorded successfully"})
+}
+
+// UpdateStaffAttendance handles staff attendance updates
+// @Summary Update staff attendance
+// @Tags operations
+// @Accept json
+// @Produce json
+// @Param id path int true "Attendance ID"
+// @Param attendance body entity.StaffAttendance true "Attendance details"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/attendance/staff/{id} [put]
+func (c *OperationController) UpdateStaffAttendance(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Attendance ID"})
+	}
+
+	var attendance entity.StaffAttendance
+	if err := ctx.BodyParser(&attendance); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+	attendance.ID = id
+
+	if err := c.usecase.UpdateStaffAttendance(ctx.Context(), &attendance); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff attendance updated successfully"})
+}
+
+// GetStaffAttendance retrieves attendance history for a staff member
+// @Summary Get staff attendance history
+// @Tags operations
+// @Produce json
+// @Param employee_id path int true "Employee ID"
+// @Param start_date query string false "Start Date (YYYY-MM-DD)"
+// @Param end_date query string false "End Date (YYYY-MM-DD)"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/operations/staff/{employee_id}/attendance [get]
+func (c *OperationController) GetStaffAttendance(ctx *fiber.Ctx) error {
+	employeeID, err := utils.ParseInt64FromParam(ctx, "employee_id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Employee ID"})
+	}
+
+	filters := make(map[string]interface{})
+	if sd := ctx.Query("start_date"); sd != "" {
+		filters["start_date"] = sd
+	}
+	if ed := ctx.Query("end_date"); ed != "" {
+		filters["end_date"] = ed
+	}
+
+	attendance, err := c.usecase.GetStaffAttendance(ctx.Context(), employeeID, filters)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff attendance retrieved successfully", Data: attendance})
 }
 
 // GetNotifications retrieves notifications for the current user
@@ -412,7 +645,7 @@ func (c *OperationController) RecordTeacherAttendance(ctx *fiber.Ctx) error {
 // @Router /api/v1/operations/notifications [get]
 func (c *OperationController) GetNotifications(ctx *fiber.Ctx) error {
 	userID := ctx.Locals("user_id").(int64)
-	
+
 	notifications, err := c.usecase.GetUserNotifications(ctx.Context(), userID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
