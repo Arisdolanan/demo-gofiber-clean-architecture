@@ -21,9 +21,9 @@ type RoleRepository interface {
 	GetRolePermissions(ctx context.Context, roleID int64) ([]*entity.Permission, error)
 
 	// User-Role assignments
-	AssignUserRole(ctx context.Context, userID, roleID int64) error
-	RemoveUserRole(ctx context.Context, userID, roleID int64) error
-	GetUserRoles(ctx context.Context, userID int64) ([]*entity.Role, error)
+	AssignUserRole(ctx context.Context, schoolID int64, userID, roleID int64) error
+	RemoveUserRole(ctx context.Context, schoolID int64, userID, roleID int64) error
+	GetUserRoles(ctx context.Context, schoolID int64, userID int64) ([]*entity.Role, error)
 }
 
 type roleRepository struct {
@@ -98,26 +98,27 @@ func (r *roleRepository) GetRolePermissions(ctx context.Context, roleID int64) (
 }
 
 // User-Role
-func (r *roleRepository) AssignUserRole(ctx context.Context, userID, roleID int64) error {
+func (r *roleRepository) AssignUserRole(ctx context.Context, schoolID int64, userID, roleID int64) error {
 	ur := &entity.UserRole{
-		UserID: userID,
-		RoleID: roleID,
+		SchoolID: schoolID,
+		UserID:   userID,
+		RoleID:   roleID,
 	}
 	// Context should contain user_id if called via middleware, which BaseRepository will use for assigned_by
 	return r.userRoleRepo.Create(ctx, ur)
 }
 
-func (r *roleRepository) RemoveUserRole(ctx context.Context, userID, roleID int64) error {
-	return r.userRoleRepo.Delete(ctx, "user_id = $1 AND role_id = $2", userID, roleID)
+func (r *roleRepository) RemoveUserRole(ctx context.Context, schoolID int64, userID, roleID int64) error {
+	return r.userRoleRepo.Delete(ctx, "school_id = $1 AND user_id = $2 AND role_id = $3", schoolID, userID, roleID)
 }
 
-func (r *roleRepository) GetUserRoles(ctx context.Context, userID int64) ([]*entity.Role, error) {
+func (r *roleRepository) GetUserRoles(ctx context.Context, schoolID int64, userID int64) ([]*entity.Role, error) {
 	var roles []*entity.Role
 	query := `
 		SELECT r.* FROM roles r
 		JOIN user_roles ur ON r.id = ur.role_id
-		WHERE ur.user_id = $1 AND r.deleted_at IS NULL
+		WHERE ur.school_id = $1 AND ur.user_id = $2 AND r.deleted_at IS NULL
 	`
-	err := r.db.SelectContext(ctx, &roles, query, userID)
+	err := r.db.SelectContext(ctx, &roles, query, schoolID, userID)
 	return roles, err
 }

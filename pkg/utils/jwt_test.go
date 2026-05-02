@@ -45,7 +45,7 @@ func TestGenerateToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			token, err := GenerateToken(tt.userID, tt.email, tt.secret, tt.expiration)
+			token, err := GenerateToken(tt.userID, tt.email, 1, "admin", tt.secret, tt.expiration)
 			
 			if tt.wantError {
 				assert.Error(t, err)
@@ -69,7 +69,7 @@ func TestValidateToken(t *testing.T) {
 	expiration := 15 * time.Minute
 
 	// Generate a valid token for testing
-	validToken, err := GenerateToken(userID, email, secret, expiration)
+	validToken, err := GenerateToken(userID, email, 1, "admin", secret, expiration)
 	assert.NoError(t, err)
 
 	tests := []struct {
@@ -144,7 +144,7 @@ func TestGenerateAndValidateTokenRoundTrip(t *testing.T) {
 	expiration := 1 * time.Hour
 
 	// Generate token
-	token, err := GenerateToken(userID, email, secret, expiration)
+	token, err := GenerateToken(userID, email, 1, "admin", secret, expiration)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
 
@@ -165,7 +165,7 @@ func TestExpiredToken(t *testing.T) {
 	expiration := -1 * time.Hour // Expired token
 
 	// Generate an expired token
-	token, err := GenerateToken(userID, email, secret, expiration)
+	token, err := GenerateToken(userID, email, 1, "admin", secret, expiration)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
 

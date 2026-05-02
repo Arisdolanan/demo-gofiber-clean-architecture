@@ -15,19 +15,21 @@ import (
 
 type UserUseCase interface {
 	CreateUser(ctx context.Context, user *entity.User) error
-	GetUserByID(id int64) (*entity.User, error)
+	GetUserByID(ctx context.Context, schoolID int64, id int64) (*entity.User, error)
 	GetUserByEmail(email string) (*entity.User, error)
 	GetUserByUsername(username string) (*entity.User, error)
-	GetAllUsers(page, pageSize int) (*entity.UserListResponse, error)
-	GetUsersBySchool(schoolID int64, page, pageSize int) (*entity.UserListResponse, error)
-	GetUsersByType(userType entity.UserType, page, pageSize int) (*entity.UserListResponse, error)
-	UpdateUser(ctx context.Context, user *entity.User) error
-	DeleteUser(ctx context.Context, id int64) error
-	SoftDeleteUser(ctx context.Context, id int64) error
+	GetAllUsers(ctx context.Context, schoolID int64, page, pageSize int) (*entity.UserListResponse, error)
+	GetUsersBySchool(ctx context.Context, schoolID int64, page, pageSize int) (*entity.UserListResponse, error)
+	GetUsersByType(ctx context.Context, schoolID int64, userType entity.UserType, page, pageSize int) (*entity.UserListResponse, error)
+	UpdateUser(ctx context.Context, schoolID int64, user *entity.User) error
+	DeleteUser(ctx context.Context, schoolID int64, id int64) error
+	SoftDeleteUser(ctx context.Context, schoolID int64, id int64) error
+	DeactivateUser(ctx context.Context, schoolID int64, id int64) error
 }
 
 type userUseCase struct {
 	userRepo   postgresql.UserRepository
+	roleRepo   postgresql.RoleRepository
 	redisCache *cache.RedisCache
 	log        *logrus.Logger
 	validate   *validator.Validate
@@ -35,12 +37,14 @@ type userUseCase struct {
 
 func NewUserUseCase(
 	userRepo postgresql.UserRepository,
+	roleRepo postgresql.RoleRepository,
 	redisCache *cache.RedisCache,
 	log *logrus.Logger,
 	validate *validator.Validate,
 ) UserUseCase {
 	return &userUseCase{
 		userRepo:   userRepo,
+		roleRepo:   roleRepo,
 		redisCache: redisCache,
 		log:        log,
 		validate:   validate,
@@ -49,14 +53,59 @@ func NewUserUseCase(
 
 // CreateUser creates a new user
 func (uc *userUseCase) CreateUser(ctx context.Context, user *entity.User) error {
+	// 1. Validation: SchoolID must not be empty
+	if len(user.SchoolID) == 0 {
+		return errors.New("school_id cannot be empty")
+	}
+
 	// Set timestamps
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
-	// Create user in database
+	// 2. Create user in database
 	if err := uc.userRepo.CreateWithContext(ctx, user); err != nil {
 		uc.log.Errorf("Error creating user: %v", err)
 		return err
+	}
+
+	// 3. Assign Default Role based on UserType
+	schoolID := user.SchoolID[0]
+	var roleCode string
+	switch user.UserType {
+	case entity.UserAdmin:
+		roleCode = "school_admin"
+	case entity.UserTeacher:
+		roleCode = "teacher"
+	case entity.UserStaff:
+		roleCode = "staff"
+	case entity.UserStudent:
+		roleCode = "student"
+	case entity.UserParent:
+		roleCode = "parent"
+	case entity.UserSuperAdmin:
+		roleCode = "super_admin"
+	}
+
+	if roleCode != "" {
+		// Find role for this school
+		var roleToAssign *entity.Role
+		var err error
+
+		if roleCode == "super_admin" {
+			roleToAssign, err = uc.roleRepo.FindByCode(ctx, nil, roleCode)
+		} else {
+			roleToAssign, err = uc.roleRepo.FindByCode(ctx, &schoolID, roleCode)
+		}
+
+		if err == nil && roleToAssign != nil {
+			if err := uc.roleRepo.AssignUserRole(ctx, schoolID, user.ID, roleToAssign.ID); err != nil {
+				uc.log.Warnf("Failed to assign default role %s to user %d: %v", roleCode, user.ID, err)
+			} else {
+				uc.log.Infof("Assigned default role %s to user %d", roleCode, user.ID)
+			}
+		} else {
+			uc.log.Warnf("Default role %s for school %d not found, skipping assignment", roleCode, schoolID)
+		}
 	}
 
 	uc.log.Infof("User created successfully: %s", user.Email)
@@ -64,8 +113,8 @@ func (uc *userUseCase) CreateUser(ctx context.Context, user *entity.User) error 
 }
 
 // GetUserByID retrieves a user by ID
-func (uc *userUseCase) GetUserByID(id int64) (*entity.User, error) {
-	user, err := uc.userRepo.FindByID(id)
+func (uc *userUseCase) GetUserByID(ctx context.Context, schoolID int64, id int64) (*entity.User, error) {
+	user, err := uc.userRepo.FindByID(ctx, schoolID, id)
 	if err != nil {
 		uc.log.Errorf("Error getting user by ID %d: %v", id, err)
 		return nil, err
@@ -101,11 +150,11 @@ func (uc *userUseCase) GetUserByUsername(username string) (*entity.User, error) 
 }
 
 // GetAllUsers retrieves all users with pagination
-func (uc *userUseCase) GetAllUsers(page, pageSize int) (*entity.UserListResponse, error) {
+func (uc *userUseCase) GetAllUsers(ctx context.Context, schoolID int64, page, pageSize int) (*entity.UserListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0)
 
-	users, err := uc.userRepo.FindAll(pagination.PageSize, pagination.Offset)
+	users, err := uc.userRepo.FindAll(ctx, schoolID, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		uc.log.Errorf("Error getting all users: %v", err)
 		return nil, err
@@ -137,10 +186,10 @@ func (uc *userUseCase) GetAllUsers(page, pageSize int) (*entity.UserListResponse
 }
 
 // GetUsersBySchool retrieves all users for a specific school with pagination
-func (uc *userUseCase) GetUsersBySchool(schoolID int64, page, pageSize int) (*entity.UserListResponse, error) {
+func (uc *userUseCase) GetUsersBySchool(ctx context.Context, schoolID int64, page, pageSize int) (*entity.UserListResponse, error) {
 	pagination := utils.CalculatePagination(page, pageSize, 0)
 
-	users, err := uc.userRepo.FindAllBySchool(schoolID, pagination.PageSize, pagination.Offset)
+	users, err := uc.userRepo.FindAllBySchool(ctx, schoolID, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		uc.log.Errorf("Error getting users for school %d: %v", schoolID, err)
 		return nil, err
@@ -166,10 +215,10 @@ func (uc *userUseCase) GetUsersBySchool(schoolID int64, page, pageSize int) (*en
 }
 
 // GetUsersByType retrieves all users of a specific type with pagination
-func (uc *userUseCase) GetUsersByType(userType entity.UserType, page, pageSize int) (*entity.UserListResponse, error) {
+func (uc *userUseCase) GetUsersByType(ctx context.Context, schoolID int64, userType entity.UserType, page, pageSize int) (*entity.UserListResponse, error) {
 	pagination := utils.CalculatePagination(page, pageSize, 0)
 
-	users, err := uc.userRepo.FindByType(userType, pagination.PageSize, pagination.Offset)
+	users, err := uc.userRepo.FindByType(ctx, schoolID, userType, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		uc.log.Errorf("Error getting users by type %s: %v", userType, err)
 		return nil, err
@@ -195,12 +244,12 @@ func (uc *userUseCase) GetUsersByType(userType entity.UserType, page, pageSize i
 }
 
 // UpdateUser updates an existing user
-func (uc *userUseCase) UpdateUser(ctx context.Context, user *entity.User) error {
+func (uc *userUseCase) UpdateUser(ctx context.Context, schoolID int64, user *entity.User) error {
 	// Set updated timestamp
 	user.UpdatedAt = time.Now()
 
 	// Update user in database
-	if err := uc.userRepo.UpdateWithContext(ctx, user); err != nil {
+	if err := uc.userRepo.UpdateWithContext(ctx, schoolID, user); err != nil {
 		uc.log.Errorf("Error updating user %d: %v", user.ID, err)
 		return err
 	}
@@ -210,8 +259,8 @@ func (uc *userUseCase) UpdateUser(ctx context.Context, user *entity.User) error 
 }
 
 // DeleteUser permanently deletes a user
-func (uc *userUseCase) DeleteUser(ctx context.Context, id int64) error {
-	if err := uc.userRepo.DeleteWithContext(ctx, id); err != nil {
+func (uc *userUseCase) DeleteUser(ctx context.Context, schoolID int64, id int64) error {
+	if err := uc.userRepo.DeleteWithContext(ctx, schoolID, id); err != nil {
 		uc.log.Errorf("Error deleting user %d: %v", id, err)
 		return err
 	}
@@ -221,12 +270,21 @@ func (uc *userUseCase) DeleteUser(ctx context.Context, id int64) error {
 }
 
 // SoftDeleteUser soft deletes a user
-func (uc *userUseCase) SoftDeleteUser(ctx context.Context, id int64) error {
-	if err := uc.userRepo.SoftDeleteWithContext(ctx, id); err != nil {
+func (uc *userUseCase) SoftDeleteUser(ctx context.Context, schoolID int64, id int64) error {
+	if err := uc.userRepo.SoftDeleteWithContext(ctx, schoolID, id); err != nil {
 		uc.log.Errorf("Error soft deleting user %d: %v", id, err)
 		return err
 	}
 
 	uc.log.Infof("User soft deleted successfully: %d", id)
 	return nil
+}
+func (uc *userUseCase) DeactivateUser(ctx context.Context, schoolID int64, id int64) error {
+	user, err := uc.userRepo.FindByID(ctx, id, schoolID)
+	if err != nil {
+		return err
+	}
+	user.IsActive = false
+	user.UpdatedAt = time.Now()
+	return uc.userRepo.Update(ctx, schoolID, user)
 }

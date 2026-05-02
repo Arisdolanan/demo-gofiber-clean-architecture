@@ -21,16 +21,20 @@ CREATE TABLE IF NOT EXISTS permissions (
 
 CREATE TABLE IF NOT EXISTS role_permissions (
     id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT REFERENCES schools(id) ON DELETE CASCADE,
     role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
     permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
-    UNIQUE(role_id, permission_id)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(school_id, role_id, permission_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_roles (
     id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT REFERENCES schools(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    UNIQUE(user_id, role_id)
+    UNIQUE(school_id, user_id, role_id)
 );
 
 CREATE TABLE IF NOT EXISTS activity_logs (

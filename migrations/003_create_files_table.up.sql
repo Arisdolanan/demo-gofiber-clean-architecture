@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS files (
     id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL,
     filename VARCHAR(255) NOT NULL UNIQUE,
     original_name VARCHAR(255) NOT NULL,
@@ -19,6 +20,8 @@ CREATE TABLE IF NOT EXISTS files (
     -- Foreign key constraint (assuming users table exists)
     CONSTRAINT fk_files_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_files_school_id ON files(school_id);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_files_user_id ON files(user_id);

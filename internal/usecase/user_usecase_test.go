@@ -32,6 +32,7 @@ type UserUsecaseTestSuite struct {
 	suite.Suite
 	userUsecase  UserUseCase
 	mockUserRepo *mocks.MockUserRepository
+	mockRoleRepo *mocks.MockRoleRepository
 	mockCache    *cache.RedisCache // Using concrete type since no interface exists
 	validator    *validator.Validate
 	logger       *logrus.Logger
@@ -39,6 +40,7 @@ type UserUsecaseTestSuite struct {
 
 func (suite *UserUsecaseTestSuite) SetupTest() {
 	suite.mockUserRepo = new(mocks.MockUserRepository)
+	suite.mockRoleRepo = new(mocks.MockRoleRepository)
 	suite.mockCache = cache.NewRedisCache() // Use real cache for now
 	suite.validator = validator.New()
 	suite.logger = logrus.New()
@@ -46,6 +48,7 @@ func (suite *UserUsecaseTestSuite) SetupTest() {
 
 	suite.userUsecase = NewUserUseCase(
 		suite.mockUserRepo,
+		suite.mockRoleRepo,
 		suite.mockCache,
 		suite.logger,
 		suite.validator,
@@ -62,10 +65,17 @@ func (suite *UserUsecaseTestSuite) TestCreateUser_Success() {
 	user := createTestUserForUserTests()
 
 	// Mock expectations
-	suite.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil)
+	suite.mockUserRepo.On("CreateWithContext", mock.Anything, mock.AnythingOfType("*entity.User")).Return(nil)
+	
+	// Add school ID to test user
+	user.SchoolID = []int64{1}
+	user.UserType = entity.UserStaff
+	
+	suite.mockRoleRepo.On("FindByCode", mock.Anything, mock.Anything, "staff").Return(&entity.Role{ID: 1}, nil)
+	suite.mockRoleRepo.On("AssignUserRole", mock.Anything, int64(1), int64(1), int64(1)).Return(nil)
 
 	// Execute
-	err := suite.userUsecase.CreateUser(user)
+	err := suite.userUsecase.CreateUser(context.Background(), user)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -77,10 +87,13 @@ func (suite *UserUsecaseTestSuite) TestCreateUser_DatabaseError() {
 	dbError := errors.New("database connection error")
 
 	// Mock expectations
-	suite.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(dbError)
+	suite.mockUserRepo.On("CreateWithContext", mock.Anything, mock.AnythingOfType("*entity.User")).Return(dbError)
+	
+	// Add school ID to test user
+	user.SchoolID = []int64{1}
 
 	// Execute
-	err := suite.userUsecase.CreateUser(user)
+	err := suite.userUsecase.CreateUser(context.Background(), user)
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -93,10 +106,10 @@ func (suite *UserUsecaseTestSuite) TestGetUserByID_Success() {
 	expectedUser := createTestUserForUserTests()
 
 	// Mock expectations
-	suite.mockUserRepo.On("FindByID", userID).Return(expectedUser, nil)
+	suite.mockUserRepo.On("FindByID", mock.Anything, int64(1), userID).Return(expectedUser, nil)
 
 	// Execute
-	user, err := suite.userUsecase.GetUserByID(userID)
+	user, err := suite.userUsecase.GetUserByID(context.Background(), 1, userID)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -110,10 +123,10 @@ func (suite *UserUsecaseTestSuite) TestGetUserByID_UserNotFound() {
 	userID := int64(1)
 
 	// Mock expectations
-	suite.mockUserRepo.On("FindByID", userID).Return(nil, nil)
+	suite.mockUserRepo.On("FindByID", mock.Anything, int64(1), userID).Return(nil, nil)
 
 	// Execute
-	user, err := suite.userUsecase.GetUserByID(userID)
+	user, err := suite.userUsecase.GetUserByID(context.Background(), 1, userID)
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -127,10 +140,10 @@ func (suite *UserUsecaseTestSuite) TestGetUserByID_DatabaseError() {
 	dbError := errors.New("database connection error")
 
 	// Mock expectations
-	suite.mockUserRepo.On("FindByID", userID).Return(nil, dbError)
+	suite.mockUserRepo.On("FindByID", mock.Anything, int64(1), userID).Return(nil, dbError)
 
 	// Execute
-	user, err := suite.userUsecase.GetUserByID(userID)
+	user, err := suite.userUsecase.GetUserByID(context.Background(), 1, userID)
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -213,10 +226,10 @@ func (suite *UserUsecaseTestSuite) TestGetAllUsers_Success() {
 	expectedUsers := []*entity.User{createTestUserForUserTests()}
 
 	// Mock expectations - the usecase internally converts page/pageSize to limit/offset
-	suite.mockUserRepo.On("FindAll", 10, 0).Return(expectedUsers, nil)
+	suite.mockUserRepo.On("FindAll", mock.Anything, int64(1), 10, 0).Return(expectedUsers, nil)
 
 	// Execute
-	users, err := suite.userUsecase.GetAllUsers(page, pageSize)
+	users, err := suite.userUsecase.GetAllUsers(context.Background(), 1, page, pageSize)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -251,10 +264,12 @@ func (suite *UserUsecaseTestSuite) TestUpdateUser_Success() {
 	user := createTestUserForUserTests()
 
 	// Mock expectations
-	suite.mockUserRepo.On("Update", mock.AnythingOfType("*entity.User")).Return(nil)
+	suite.mockUserRepo.On("Update", mock.Anything, int64(1), mock.AnythingOfType("*entity.User")).Return(nil)
+	
+	user.SchoolID = []int64{1}
 
 	// Execute
-	err := suite.userUsecase.UpdateUser(user)
+	err := suite.userUsecase.UpdateUser(context.Background(), 1, user)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -281,10 +296,10 @@ func (suite *UserUsecaseTestSuite) TestDeleteUser_Success() {
 	userID := int64(1)
 
 	// Mock expectations
-	suite.mockUserRepo.On("Delete", userID).Return(nil)
+	suite.mockUserRepo.On("Delete", mock.Anything, int64(1), userID).Return(nil)
 
 	// Execute
-	err := suite.userUsecase.DeleteUser(userID)
+	err := suite.userUsecase.DeleteUser(context.Background(), 1, userID)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -296,10 +311,10 @@ func (suite *UserUsecaseTestSuite) TestDeleteUser_DatabaseError() {
 	dbError := errors.New("database connection error")
 
 	// Mock expectations
-	suite.mockUserRepo.On("Delete", userID).Return(dbError)
+	suite.mockUserRepo.On("Delete", mock.Anything, int64(1), userID).Return(dbError)
 
 	// Execute
-	err := suite.userUsecase.DeleteUser(userID)
+	err := suite.userUsecase.DeleteUser(context.Background(), 1, userID)
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -311,10 +326,10 @@ func (suite *UserUsecaseTestSuite) TestSoftDeleteUser_Success() {
 	userID := int64(1)
 
 	// Mock expectations
-	suite.mockUserRepo.On("SoftDelete", userID).Return(nil)
+	suite.mockUserRepo.On("SoftDelete", mock.Anything, int64(1), userID).Return(nil)
 
 	// Execute
-	err := suite.userUsecase.SoftDeleteUser(userID)
+	err := suite.userUsecase.SoftDeleteUser(context.Background(), 1, userID)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -326,10 +341,10 @@ func (suite *UserUsecaseTestSuite) TestSoftDeleteUser_DatabaseError() {
 	dbError := errors.New("database connection error")
 
 	// Mock expectations
-	suite.mockUserRepo.On("SoftDelete", userID).Return(dbError)
+	suite.mockUserRepo.On("SoftDelete", mock.Anything, int64(1), userID).Return(dbError)
 
 	// Execute
-	err := suite.userUsecase.SoftDeleteUser(userID)
+	err := suite.userUsecase.SoftDeleteUser(context.Background(), 1, userID)
 
 	// Assert
 	assert.Error(suite.T(), err)

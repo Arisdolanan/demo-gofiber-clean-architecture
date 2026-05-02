@@ -22,14 +22,17 @@ type School struct {
 	ID                    int64        `json:"id" db:"id"`
 	Code                  string       `json:"code" db:"code" validate:"required"`
 	Name                  string       `json:"name" db:"name" validate:"required"`
-	Email                 string       `json:"email" db:"email" validate:"required,email"`
-	Phone                 string       `json:"phone" db:"phone"`
-	Address               string       `json:"address" db:"address"`
-	City                  string       `json:"city" db:"city"`
-	Province              string       `json:"province" db:"province"`
-	Country               string       `json:"country" db:"country"`
-	SchoolLevel           SchoolLevel  `json:"school_level" db:"school_level"`
-	Logo                  string       `json:"logo" db:"logo"`
+	Email                 *string      `json:"email" db:"email" validate:"omitempty,email"`
+	Phone                 *string      `json:"phone" db:"phone"`
+	Address               *string      `json:"address" db:"address"`
+	City                  *string      `json:"city" db:"city"`
+	Province              *string      `json:"province" db:"province"`
+	Country               *string      `json:"country" db:"country"`
+	SchoolLevel           *SchoolLevel `json:"school_level" db:"school_level"`
+	Npsn                  *string      `json:"npsn" db:"npsn"`
+	PrincipalName         *string      `json:"principal_name" db:"principal_name"`
+	Accreditation         *string      `json:"accreditation" db:"accreditation"`
+	Logo                  *string      `json:"logo" db:"logo"`
 	Status                SchoolStatus `json:"status" db:"status"`
 	SubscriptionStartDate *time.Time   `json:"subscription_start_date,omitempty" db:"subscription_start_date"`
 	SubscriptionEndDate   *time.Time   `json:"subscription_end_date,omitempty" db:"subscription_end_date"`
@@ -39,8 +42,8 @@ type School struct {
 type AppPackage struct {
 	ID           int64   `json:"id" db:"id"`
 	Code         string  `json:"code" db:"code" validate:"required"`
-	Name         string  `json:"name" db:"name" validate:"required"`
-	Description  string  `json:"description" db:"description"`
+	Name         string   `json:"name" db:"name" validate:"required"`
+	Description  *string  `json:"description" db:"description"`
 	PriceMonthly float64 `json:"price_monthly" db:"price_monthly"`
 	PriceYearly  float64 `json:"price_yearly" db:"price_yearly"`
 	MaxStudents  int     `json:"max_students" db:"max_students"`
@@ -81,10 +84,10 @@ type Payment struct {
 	SchoolID        int64         `json:"school_id" db:"school_id"`
 	SchoolLicenseID *int64        `json:"school_license_id,omitempty" db:"school_license_id"`
 	Amount          float64       `json:"amount" db:"amount" validate:"required"`
-	PaymentMethod   string        `json:"payment_method" db:"payment_method"`
+	PaymentMethod   *string       `json:"payment_method" db:"payment_method"`
 	PaymentDate     *time.Time    `json:"payment_date,omitempty" db:"payment_date"`
-	ReferenceNumber string        `json:"reference_number" db:"reference_number"`
-	ProofFileURL    string        `json:"proof_file_url" db:"proof_file_url"`
+	ReferenceNumber *string       `json:"reference_number" db:"reference_number"`
+	ProofFileURL    *string       `json:"proof_file_url" db:"proof_file_url"`
 	Status          PaymentStatus `json:"status" db:"status"`
 	Notes           string        `json:"notes" db:"notes"`
 	BaseEntity

@@ -56,6 +56,22 @@ func (c *UserController) CreateUser(ctx *fiber.Ctx) error {
 		}
 	}
 
+	// Ensure user is created within the context of the current school
+	schoolID, err := utils.GetSchoolIDFromToken(ctx)
+	if err == nil && schoolID > 0 {
+		// Only add schoolID if it's not already in the array
+		hasSchool := false
+		for _, id := range user.SchoolID {
+			if id == schoolID {
+				hasSchool = true
+				break
+			}
+		}
+		if !hasSchool {
+			user.SchoolID = append(user.SchoolID, schoolID)
+		}
+	}
+
 	if err := c.UseCase.CreateUser(reqCtx, &user); err != nil {
 		c.Log.Errorf("Error creating user: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
@@ -97,7 +113,8 @@ func (c *UserController) GetUserByID(ctx *fiber.Ctx) error {
 		})
 	}
 
-	user, err := c.UseCase.GetUserByID(id)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	user, err := c.UseCase.GetUserByID(ctx.Context(), schoolID, id)
 	if err != nil {
 		c.Log.Errorf("Error getting user by ID %d: %v", id, err)
 		return ctx.Status(fiber.StatusNotFound).JSON(response.HTTPErrorResponse{
@@ -130,11 +147,10 @@ func (c *UserController) GetUserByID(ctx *fiber.Ctx) error {
 // @Failure 500 {object} response.HTTPErrorResponse "Failed to retrieve users"
 // @Router /api/v1/users [get]
 func (c *UserController) GetAllUsers(ctx *fiber.Ctx) error {
-	// Parse pagination parameters using utils
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	params := utils.ParsePaginationQuery(ctx)
-
 	// Use page/pageSize approach for the usecase
-	users, err := c.UseCase.GetAllUsers(params.Page, params.PageSize)
+	users, err := c.UseCase.GetAllUsers(ctx.Context(), schoolID, params.Page, params.PageSize)
 	if err != nil {
 		c.Log.Errorf("Error getting all users: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
@@ -200,7 +216,9 @@ func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
 		}
 	}
 
-	if err := c.UseCase.UpdateUser(reqCtx, &user); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.UseCase.UpdateUser(reqCtx, schoolID, &user); err != nil {
 		c.Log.Errorf("Error updating user %d: %v", id, err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
 			Status:  fiber.StatusInternalServerError,
@@ -250,7 +268,9 @@ func (c *UserController) DeleteUser(ctx *fiber.Ctx) error {
 		}
 	}
 
-	if err := c.UseCase.DeleteUser(reqCtx, id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.UseCase.DeleteUser(reqCtx, schoolID, id); err != nil {
 		c.Log.Errorf("Error deleting user %d: %v", id, err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
 			Status:  fiber.StatusInternalServerError,
@@ -299,7 +319,9 @@ func (c *UserController) SoftDeleteUser(ctx *fiber.Ctx) error {
 		}
 	}
 
-	if err := c.UseCase.SoftDeleteUser(reqCtx, id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.UseCase.SoftDeleteUser(reqCtx, schoolID, id); err != nil {
 		c.Log.Errorf("Error soft deleting user %d: %v", id, err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
 			Status:  fiber.StatusInternalServerError,

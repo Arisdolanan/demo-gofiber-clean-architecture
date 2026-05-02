@@ -36,11 +36,17 @@ func (c *PeopleController) CreateTeacher(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateTeacher(ctx.Context(), &teacher); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	resp, err := c.usecase.CreateTeacher(ctx.Context(), schoolID, &teacher)
+	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{Status: fiber.StatusCreated, Message: "Teacher created successfully"})
+	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Teacher created successfully",
+		Data:    resp,
+	})
 }
 
 // UpdateTeacher handles teacher updates
@@ -65,7 +71,9 @@ func (c *PeopleController) UpdateTeacher(ctx *fiber.Ctx) error {
 	}
 	teacher.ID = id
 
-	if err := c.usecase.UpdateTeacher(ctx.Context(), &teacher); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateTeacher(ctx.Context(), schoolID, &teacher); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -80,10 +88,7 @@ func (c *PeopleController) UpdateTeacher(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/people/teachers [get]
 func (c *PeopleController) GetTeachers(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	teachers, err := c.usecase.GetTeachersBySchool(ctx.Context(), schoolID)
 	if err != nil {
@@ -106,12 +111,36 @@ func (c *PeopleController) GetTeacherByUserID(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid User ID"})
 	}
 
-	teacher, err := c.usecase.GetTeacherByUserID(ctx.Context(), userID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	teacher, err := c.usecase.GetTeacherByUserID(ctx.Context(), schoolID, userID)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+		return ctx.Status(fiber.StatusNotFound).JSON(response.HTTPErrorResponse{Status: fiber.StatusNotFound, Message: "Teacher not found"})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Teacher retrieved successfully", Data: teacher})
+}
+
+// DeleteTeacher handles teacher deletion
+// @Summary Delete school teacher
+// @Tags people
+// @Produce json
+// @Param id path int true "Teacher ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/people/teachers/{id} [delete]
+func (c *PeopleController) DeleteTeacher(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Teacher ID"})
+	}
+
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteTeacher(ctx.Context(), schoolID, id); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Teacher deleted and user deactivated successfully"})
 }
 
 // CreateStudent handles student registration
@@ -119,7 +148,7 @@ func (c *PeopleController) GetTeacherByUserID(ctx *fiber.Ctx) error {
 // @Tags people
 // @Accept json
 // @Produce json
-// @Param student body entity.Student true "Student details"
+// @Param student body entity.Student true "Student details (can include parents for unified registration)"
 // @Success 201 {object} response.HTTPSuccessResponse
 // @Router /api/v1/people/students [post]
 func (c *PeopleController) CreateStudent(ctx *fiber.Ctx) error {
@@ -128,11 +157,17 @@ func (c *PeopleController) CreateStudent(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateStudent(ctx.Context(), &student); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	resp, err := c.usecase.CreateStudent(ctx.Context(), schoolID, &student)
+	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{Status: fiber.StatusCreated, Message: "Student created successfully"})
+	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Student registered successfully",
+		Data:    resp,
+	})
 }
 
 // UpdateStudent handles student updates
@@ -156,7 +191,9 @@ func (c *PeopleController) UpdateStudent(ctx *fiber.Ctx) error {
 	}
 	student.ID = id
 
-	if err := c.usecase.UpdateStudent(ctx.Context(), &student); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateStudent(ctx.Context(), schoolID, &student); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -173,10 +210,7 @@ func (c *PeopleController) UpdateStudent(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/people/students/list [get]
 func (c *PeopleController) GetAllStudents(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	limit := ctx.QueryInt("limit", 10)
 	offset := ctx.QueryInt("offset", 0)
@@ -211,12 +245,37 @@ func (c *PeopleController) GetStudentsBySection(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Section ID"})
 	}
 
-	students, err := c.usecase.GetStudentsBySection(ctx.Context(), sectionID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	students, err := c.usecase.GetStudentsBySection(ctx.Context(), schoolID, sectionID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Section students retrieved successfully", Data: students})
+}
+
+// GetStudentByID retrieves student details by ID
+// @Summary Get student by ID
+// @Tags people
+// @Produce json
+// @Param id path int true "Student ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/people/students/{id} [get]
+func (c *PeopleController) GetStudentByID(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Student ID"})
+	}
+
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	student, err := c.usecase.GetStudentByID(ctx.Context(), schoolID, id)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Student retrieved successfully", Data: student})
 }
 
 // GetStudentByUserID retrieves student details by user ID
@@ -232,12 +291,30 @@ func (c *PeopleController) GetStudentByUserID(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid User ID"})
 	}
 
-	student, err := c.usecase.GetStudentByUserID(ctx.Context(), userID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	student, err := c.usecase.GetStudentByUserID(ctx.Context(), schoolID, userID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Student retrieved successfully", Data: student})
+}
+
+// DeleteStudent handles student deletion
+func (c *PeopleController) DeleteStudent(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Student ID"})
+	}
+
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteStudent(ctx.Context(), schoolID, id); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Student deleted and user deactivated successfully"})
 }
 
 // EnrollStudent handles student enrollment in a section
@@ -254,7 +331,8 @@ func (c *PeopleController) EnrollStudent(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.EnrollStudent(ctx.Context(), &enrollment); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.EnrollStudent(ctx.Context(), schoolID, &enrollment); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -274,7 +352,9 @@ func (c *PeopleController) GetStudentSections(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Student ID"})
 	}
 
-	sections, err := c.usecase.GetStudentSections(ctx.Context(), studentID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	sections, err := c.usecase.GetStudentSections(ctx.Context(), schoolID, studentID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -296,11 +376,17 @@ func (c *PeopleController) CreateParent(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateParent(ctx.Context(), &parent); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	resp, err := c.usecase.CreateParent(ctx.Context(), schoolID, &parent)
+	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{Status: fiber.StatusCreated, Message: "Parent created successfully"})
+	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Parent created successfully",
+		Data:    resp,
+	})
 }
 
 // GetParents retrieves all parents for a school
@@ -311,10 +397,7 @@ func (c *PeopleController) CreateParent(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/people/parents [get]
 func (c *PeopleController) GetParents(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	parents, err := c.usecase.GetParentsBySchool(ctx.Context(), schoolID)
 	if err != nil {
@@ -322,6 +405,29 @@ func (c *PeopleController) GetParents(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parents retrieved successfully", Data: parents})
+}
+
+// SearchParents searches parents by name, phone or email
+// @Summary Search parents
+// @Tags people
+// @Produce json
+// @Param q query string true "Search query"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/people/parents/search [get]
+func (c *PeopleController) SearchParents(ctx *fiber.Ctx) error {
+	query := ctx.Query("q")
+	if query == "" {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Query parameter 'q' is required"})
+	}
+
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	parents, err := c.usecase.SearchParents(ctx.Context(), schoolID, query)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parents searched successfully", Data: parents})
 }
 
 // UpdateParent handles parent updates
@@ -346,7 +452,9 @@ func (c *PeopleController) UpdateParent(ctx *fiber.Ctx) error {
 	}
 	parent.ID = id
 
-	if err := c.usecase.UpdateParent(ctx.Context(), &parent); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateParent(ctx.Context(), schoolID, &parent); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -366,11 +474,13 @@ func (c *PeopleController) DeleteParent(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Parent ID"})
 	}
 
-	if err := c.usecase.DeleteParent(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteParent(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parent deleted successfully"})
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Parent deleted and user deactivated successfully"})
 }
 
 // LinkParentToStudent links a parent to a student
@@ -387,7 +497,8 @@ func (c *PeopleController) LinkParentToStudent(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.LinkParentToStudent(ctx.Context(), &link); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.LinkParentToStudent(ctx.Context(), schoolID, &link); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -409,11 +520,17 @@ func (c *PeopleController) CreateStaff(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateStaff(ctx.Context(), &staff); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	resp, err := c.usecase.CreateStaff(ctx.Context(), schoolID, &staff)
+	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{Status: fiber.StatusCreated, Message: "Staff created successfully"})
+	return ctx.Status(fiber.StatusCreated).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Staff created successfully",
+		Data:    resp,
+	})
 }
 
 // UpdateStaff handles staff updates
@@ -438,7 +555,9 @@ func (c *PeopleController) UpdateStaff(ctx *fiber.Ctx) error {
 	}
 	staff.ID = id
 
-	if err := c.usecase.UpdateStaff(ctx.Context(), &staff); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateStaff(ctx.Context(), schoolID, &staff); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -453,10 +572,7 @@ func (c *PeopleController) UpdateStaff(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/people/staff [get]
 func (c *PeopleController) GetStaff(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	staff, err := c.usecase.GetStaffBySchool(ctx.Context(), schoolID)
 	if err != nil {
@@ -479,9 +595,34 @@ func (c *PeopleController) DeleteStaff(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Staff ID"})
 	}
 
-	if err := c.usecase.DeleteStaff(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteStaff(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff deleted successfully"})
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff deleted and user deactivated successfully"})
+}
+
+// GetStaffByUserID retrieves staff details by user ID
+// @Summary Get staff by User ID
+// @Tags people
+// @Produce json
+// @Param user_id path int true "User ID"
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Router /api/v1/people/staff/users/{user_id} [get]
+func (c *PeopleController) GetStaffByUserID(ctx *fiber.Ctx) error {
+	userID, err := utils.ParseInt64FromParam(ctx, "user_id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid User ID"})
+	}
+
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	staff, err := c.usecase.GetStaffByUserID(ctx.Context(), schoolID, userID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Staff retrieved successfully", Data: staff})
 }

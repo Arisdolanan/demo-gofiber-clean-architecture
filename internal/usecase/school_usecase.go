@@ -15,6 +15,7 @@ type SchoolUsecase interface {
 	RegisterSchool(ctx context.Context, school *entity.School) error
 	GetSchoolByID(ctx context.Context, id int64) (*entity.School, error)
 	GetAllSchools(ctx context.Context) ([]*entity.School, error)
+	UpdateSchool(ctx context.Context, school *entity.School) error
 	
 	// Package management
 	CreatePackage(ctx context.Context, pkg *entity.AppPackage) error
@@ -100,6 +101,13 @@ func (uc *schoolUsecase) AssignLicense(ctx context.Context, schoolID int64, pack
 	}
 
 	return license, nil
+}
+
+func (uc *schoolUsecase) UpdateSchool(ctx context.Context, school *entity.School) error {
+	if err := uc.validate.Struct(school); err != nil {
+		return err
+	}
+	return uc.repo.Update(ctx, school)
 }
 
 func (uc *schoolUsecase) generateLicenseKey() string {

@@ -122,3 +122,8 @@ DELETE FROM app_packages WHERE code IN ('PKG-BASIC', 'PKG-PRO', 'PKG-ENTERPRISE'
 -- ============================================
 DROP TABLE IF EXISTS staff CASCADE;
 DROP TYPE IF EXISTS staff_status;
+
+-- ============================================
+-- 25. SETTINGS TABLE
+-- ============================================
+DELETE FROM settings;

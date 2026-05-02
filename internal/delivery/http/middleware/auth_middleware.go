@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"strings"
 
 	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/repository/redis"
@@ -45,6 +46,8 @@ func JWTProtected(jwtSecret string) fiber.Handler {
 		// Set user information and token in context for blacklist checking
 		c.Locals("user_id", claims.UserID)
 		c.Locals("email", claims.Email)
+		c.Locals("school_id", claims.SchoolID)
+		c.Locals("user_type", claims.UserType)
 		c.Locals("token", tokenString)
 
 		return c.Next()
@@ -77,13 +80,12 @@ func JWTProtectedWithBlacklist(jwtSecret string, authRedis redis.AuthRedisReposi
 			})
 		}
 
-		// Check if token is blacklisted
+		// Check if token is blacklisted (gracefully handle Redis unavailability)
+		isBlacklisted := false
 		isBlacklisted, err := authRedis.IsTokenBlacklisted(tokenString)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status":  fiber.StatusInternalServerError,
-				"message": "Error checking token status",
-			})
+			// Log the error but continue - Redis failure shouldn't block all requests
+			log.Printf("Warning: Redis unavailable, skipping blacklist check: %v", err)
 		}
 
 		if isBlacklisted {
@@ -103,6 +105,8 @@ func JWTProtectedWithBlacklist(jwtSecret string, authRedis redis.AuthRedisReposi
 
 		c.Locals("user_id", claims.UserID)
 		c.Locals("email", claims.Email)
+		c.Locals("school_id", claims.SchoolID)
+		c.Locals("user_type", claims.UserType)
 		c.Locals("token", tokenString)
 
 		return c.Next()

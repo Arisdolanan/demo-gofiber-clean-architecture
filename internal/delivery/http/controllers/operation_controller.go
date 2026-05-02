@@ -35,7 +35,8 @@ func (c *OperationController) CreateSchedule(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateSchedule(ctx.Context(), &schedule); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.CreateSchedule(ctx.Context(), schoolID, &schedule); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -63,7 +64,8 @@ func (c *OperationController) UpdateSchedule(ctx *fiber.Ctx) error {
 	}
 	schedule.ID = id
 
-	if err := c.usecase.UpdateSchedule(ctx.Context(), &schedule); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.UpdateSchedule(ctx.Context(), schoolID, &schedule); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -82,7 +84,9 @@ func (c *OperationController) DeleteSchedule(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Schedule ID"})
 	}
 
-	if err := c.usecase.DeleteSchedule(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteSchedule(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -106,7 +110,9 @@ func (c *OperationController) GetAllSchedules(ctx *fiber.Ctx) error {
 		filters["teacher_id"] = tid
 	}
 
-	schedules, err := c.usecase.GetAllSchedules(ctx.Context(), filters)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	schedules, err := c.usecase.GetAllSchedules(ctx.Context(), schoolID, filters)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -128,7 +134,8 @@ func (c *OperationController) CreateExam(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateExam(ctx.Context(), &exam); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.CreateExam(ctx.Context(), schoolID, &exam); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -156,7 +163,8 @@ func (c *OperationController) UpdateExam(ctx *fiber.Ctx) error {
 	}
 	exam.ID = id
 
-	if err := c.usecase.UpdateExam(ctx.Context(), &exam); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.UpdateExam(ctx.Context(), schoolID, &exam); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -175,7 +183,9 @@ func (c *OperationController) DeleteExam(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Exam ID"})
 	}
 
-	if err := c.usecase.DeleteExam(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteExam(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -195,7 +205,9 @@ func (c *OperationController) GetAllExams(ctx *fiber.Ctx) error {
 		filters["section_id"] = sid
 	}
 
-	exams, err := c.usecase.GetAllExams(ctx.Context(), filters)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	exams, err := c.usecase.GetAllExams(ctx.Context(), schoolID, filters)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -217,7 +229,9 @@ func (c *OperationController) UpdateMark(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.UpdateMark(ctx.Context(), &mark); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateMark(ctx.Context(), schoolID, &mark); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -237,7 +251,9 @@ func (c *OperationController) GetExamMarks(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Exam ID"})
 	}
 
-	marks, err := c.usecase.GetExamMarks(ctx.Context(), examID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	marks, err := c.usecase.GetExamMarks(ctx.Context(), schoolID, examID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -258,7 +274,9 @@ func (c *OperationController) GetStudentMarks(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Student ID"})
 	}
 
-	marks, err := c.usecase.GetStudentMarks(ctx.Context(), studentID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	marks, err := c.usecase.GetStudentMarks(ctx.Context(), schoolID, studentID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -280,18 +298,34 @@ func (c *OperationController) RecordStudentAttendance(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	// Debug: Log parsed data
+	// Capture IP and Device Info
+	ip := ctx.IP()
+	userAgent := string(ctx.Request().Header.UserAgent())
+
+	if attendance.CheckInIPAddress == nil {
+		attendance.CheckInIPAddress = &ip
+	}
+	if attendance.CheckInDevice == nil {
+		attendance.CheckInDevice = &userAgent
+	}
+
+	// Also update check-out info if it's a check-out request
+	if attendance.CheckOutTime != nil {
+		if attendance.CheckOutIPAddress == nil {
+			attendance.CheckOutIPAddress = &ip
+		}
+		if attendance.CheckOutDevice == nil {
+			attendance.CheckOutDevice = &userAgent
+		}
+	}
+
 	c.log.WithContext(ctx.Context()).Infof("=== STUDENT ATTENDANCE DEBUG ===")
-	c.log.WithContext(ctx.Context()).Infof("Student ID: %d", attendance.StudentID)
-	c.log.WithContext(ctx.Context()).Infof("Section ID: %d", attendance.SectionID)
-	c.log.WithContext(ctx.Context()).Infof("Academic Session ID: %d", attendance.AcademicSessionID)
-	c.log.WithContext(ctx.Context()).Infof("Attendance Date: %v", attendance.AttendanceDate)
-	c.log.WithContext(ctx.Context()).Infof("Status: %s", attendance.Status)
-	c.log.WithContext(ctx.Context()).Infof("Notes: %v", attendance.Notes)
-	c.log.WithContext(ctx.Context()).Infof("CheckInIPAddress: %v", attendance.CheckInIPAddress)
+	c.log.WithContext(ctx.Context()).Infof("Student ID: %d, IP: %s, Device: %s", attendance.StudentID, ip, userAgent)
 	c.log.WithContext(ctx.Context()).Infof("================================")
 
-	if err := c.usecase.RecordStudentAttendance(ctx.Context(), &attendance); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.RecordStudentAttendance(ctx.Context(), schoolID, &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -319,7 +353,9 @@ func (c *OperationController) UpdateStudentAttendance(ctx *fiber.Ctx) error {
 	}
 	attendance.ID = id
 
-	if err := c.usecase.UpdateStudentAttendance(ctx.Context(), &attendance); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateStudentAttendance(ctx.Context(), schoolID, &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -349,7 +385,9 @@ func (c *OperationController) GetStudentAttendance(ctx *fiber.Ctx) error {
 		filters["end_date"] = ed
 	}
 
-	attendance, err := c.usecase.GetStudentAttendance(ctx.Context(), studentID, filters)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	attendance, err := c.usecase.GetStudentAttendance(ctx.Context(), schoolID, studentID, filters)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -369,17 +407,18 @@ func (c *OperationController) GetAttendanceReport(ctx *fiber.Ctx) error {
 	sectionIDStr := ctx.Query("section_id")
 	sessionIDStr := ctx.Query("academic_session_id")
 	subjectIDStr := ctx.Query("subject_id")
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	date := ctx.Query("date")
 
-	if sectionIDStr != "" && date != "" {
+	if sectionIDStr != "" && sectionIDStr != "null" && date != "" && date != "null" {
 		sectionID, _ := utils.ParseInt64(sectionIDStr)
 		var subjectID *int64
 		if subjectIDStr != "" && subjectIDStr != "null" {
 			sid, _ := utils.ParseInt64(subjectIDStr)
 			subjectID = &sid
 		}
-		
-		attendance, err := c.usecase.GetAttendanceBySection(ctx.Context(), sectionID, date, subjectID)
+
+		attendance, err := c.usecase.GetAttendanceBySection(ctx.Context(), schoolID, sectionID, date, subjectID)
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 		}
@@ -387,17 +426,23 @@ func (c *OperationController) GetAttendanceReport(ctx *fiber.Ctx) error {
 	}
 
 	filters := make(map[string]interface{})
-	if sectionIDStr != "" {
-		filters["section_id"] = sectionIDStr
+	if sectionIDStr != "" && sectionIDStr != "null" {
+		val, _ := utils.ParseInt64(sectionIDStr)
+		filters["section_id"] = val
 	}
-	if sessionIDStr != "" {
-		filters["academic_session_id"] = sessionIDStr
+	if sessionIDStr != "" && sessionIDStr != "null" {
+		val, _ := utils.ParseInt64(sessionIDStr)
+		filters["academic_session_id"] = val
 	}
-	if date != "" {
+	if subjectIDStr != "" && subjectIDStr != "null" {
+		val, _ := utils.ParseInt64(subjectIDStr)
+		filters["subject_id"] = val
+	}
+	if date != "" && date != "null" {
 		filters["date"] = date
 	}
 
-	attendance, err := c.usecase.GetAttendanceWithFilters(ctx.Context(), filters)
+	attendance, err := c.usecase.GetAttendanceWithFilters(ctx.Context(), schoolID, filters)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -419,7 +464,9 @@ func (c *OperationController) GetSectionStudentsForAttendance(ctx *fiber.Ctx) er
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Section ID"})
 	}
 
-	students, err := c.usecase.GetStudentsBySectionForAttendance(ctx.Context(), sectionID)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	students, err := c.usecase.GetStudentsBySectionForAttendance(ctx.Context(), schoolID, sectionID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -456,11 +503,17 @@ func (c *OperationController) RecordSectionAttendance(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Data absensi siswa tidak boleh kosong"})
 	}
 
+	// Capture IP and Device Info
+	req.IPAddress = ctx.IP()
+	req.UserAgent = string(ctx.Request().Header.UserAgent())
+
 	c.log.WithContext(ctx.Context()).Infof("=== SECTION ATTENDANCE DEBUG ===")
 	c.log.WithContext(ctx.Context()).Infof("Section ID: %d, Session ID: %d, Subject ID: %d", req.SectionID, req.AcademicSessionID, req.SubjectID)
 	c.log.WithContext(ctx.Context()).Infof("Total students: %d", len(req.Attendances))
 
-	if err := c.usecase.RecordSectionAttendance(ctx.Context(), &req); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.RecordSectionAttendance(ctx.Context(), schoolID, &req); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -481,17 +534,35 @@ func (c *OperationController) RecordTeacherAttendance(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
+	// Capture IP and Device Info
+	ip := ctx.IP()
+	userAgent := string(ctx.Request().Header.UserAgent())
+
+	if attendance.CheckInIPAddress == nil {
+		attendance.CheckInIPAddress = &ip
+	}
+	if attendance.CheckInDevice == nil {
+		attendance.CheckInDevice = &userAgent
+	}
+
+	// Also update check-out info if it's a check-out request
+	if attendance.CheckOutTime != nil {
+		if attendance.CheckOutIPAddress == nil {
+			attendance.CheckOutIPAddress = &ip
+		}
+		if attendance.CheckOutDevice == nil {
+			attendance.CheckOutDevice = &userAgent
+		}
+	}
+
 	// Debug: Log parsed data
 	c.log.WithContext(ctx.Context()).Infof("=== TEACHER ATTENDANCE DEBUG ===")
-	c.log.WithContext(ctx.Context()).Infof("Teacher ID: %d", attendance.TeacherID)
-	c.log.WithContext(ctx.Context()).Infof("Attendance Date: %v", attendance.AttendanceDate)
-	c.log.WithContext(ctx.Context()).Infof("CheckInTime: %v", attendance.CheckInTime)
-	c.log.WithContext(ctx.Context()).Infof("CheckOutTime: %v", attendance.CheckOutTime)
-	c.log.WithContext(ctx.Context()).Infof("Status: %s", attendance.Status)
-	c.log.WithContext(ctx.Context()).Infof("CheckInIPAddress: %v", attendance.CheckInIPAddress)
+	c.log.WithContext(ctx.Context()).Infof("Teacher ID: %d, IP: %s, Device: %s", attendance.TeacherID, ip, userAgent)
 	c.log.WithContext(ctx.Context()).Infof("================================")
 
-	if err := c.usecase.RecordTeacherAttendance(ctx.Context(), &attendance); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.RecordTeacherAttendance(ctx.Context(), schoolID, &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -519,7 +590,9 @@ func (c *OperationController) UpdateTeacherAttendance(ctx *fiber.Ctx) error {
 	}
 	attendance.ID = id
 
-	if err := c.usecase.UpdateTeacherAttendance(ctx.Context(), &attendance); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateTeacherAttendance(ctx.Context(), schoolID, &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -549,7 +622,9 @@ func (c *OperationController) GetTeacherAttendance(ctx *fiber.Ctx) error {
 		filters["end_date"] = ed
 	}
 
-	attendance, err := c.usecase.GetTeacherAttendance(ctx.Context(), teacherID, filters)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	attendance, err := c.usecase.GetTeacherAttendance(ctx.Context(), schoolID, teacherID, filters)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -571,7 +646,30 @@ func (c *OperationController) RecordStaffAttendance(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.RecordStaffAttendance(ctx.Context(), &attendance); err != nil {
+	// Capture IP and Device Info
+	ip := ctx.IP()
+	userAgent := string(ctx.Request().Header.UserAgent())
+
+	if attendance.CheckInIPAddress == nil {
+		attendance.CheckInIPAddress = &ip
+	}
+	if attendance.CheckInDevice == nil {
+		attendance.CheckInDevice = &userAgent
+	}
+
+	// Also update check-out info if it's a check-out request
+	if attendance.CheckOutTime != nil {
+		if attendance.CheckOutIPAddress == nil {
+			attendance.CheckOutIPAddress = &ip
+		}
+		if attendance.CheckOutDevice == nil {
+			attendance.CheckOutDevice = &userAgent
+		}
+	}
+
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.RecordStaffAttendance(ctx.Context(), schoolID, &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -599,7 +697,9 @@ func (c *OperationController) UpdateStaffAttendance(ctx *fiber.Ctx) error {
 	}
 	attendance.ID = id
 
-	if err := c.usecase.UpdateStaffAttendance(ctx.Context(), &attendance); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.UpdateStaffAttendance(ctx.Context(), schoolID, &attendance); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -629,7 +729,9 @@ func (c *OperationController) GetStaffAttendance(ctx *fiber.Ctx) error {
 		filters["end_date"] = ed
 	}
 
-	attendance, err := c.usecase.GetStaffAttendance(ctx.Context(), employeeID, filters)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	attendance, err := c.usecase.GetStaffAttendance(ctx.Context(), schoolID, employeeID, filters)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -666,10 +768,11 @@ func (c *OperationController) GetNotifications(ctx *fiber.Ctx) error {
 // @Failure 500 {object} response.HTTPErrorResponse
 // @Router /api/v1/operations/report-card [get]
 func (c *OperationController) GetReportCard(ctx *fiber.Ctx) error {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	studentID, _ := utils.ParseInt64(ctx.Query("student_id"))
 	sessionID, _ := utils.ParseInt64(ctx.Query("session_id"))
 
-	report, err := c.usecase.GetStudentReportCard(ctx.Context(), studentID, sessionID)
+	report, err := c.usecase.GetStudentReportCard(ctx.Context(), schoolID, studentID, sessionID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -689,13 +792,34 @@ func (c *OperationController) GetReportCard(ctx *fiber.Ctx) error {
 // @Failure 500 {object} response.HTTPErrorResponse
 // @Router /api/v1/operations/report-card/section [get]
 func (c *OperationController) GetSectionReportCards(ctx *fiber.Ctx) error {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	sectionID, _ := utils.ParseInt64(ctx.Query("section_id"))
 	sessionID, _ := utils.ParseInt64(ctx.Query("session_id"))
 
-	reports, err := c.usecase.GetSectionReportCards(ctx.Context(), sectionID, sessionID)
+	reports, err := c.usecase.GetSectionReportCards(ctx.Context(), schoolID, sectionID, sessionID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Class report cards retrieved successfully", Data: reports})
+}
+
+// GetIntegrationDefinitions handles fetching integration definitions
+// @Summary Get integration definitions
+// @Description Get all integration definitions (metadata) for the school
+// @Tags operations
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.HTTPSuccessResponse
+// @Failure 500 {object} response.HTTPErrorResponse
+// @Router /api/v1/operations/integrations/definitions [get]
+func (c *OperationController) GetIntegrationDefinitions(ctx *fiber.Ctx) error {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	definitions, err := c.usecase.GetIntegrationDefinitions(ctx.Context(), schoolID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{Status: fiber.StatusOK, Message: "Integration definitions retrieved successfully", Data: definitions})
 }

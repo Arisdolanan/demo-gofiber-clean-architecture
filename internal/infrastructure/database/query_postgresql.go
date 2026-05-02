@@ -208,11 +208,14 @@ func (q *Query) Update(ctx context.Context, values map[string]any) error {
 	// Re-index placeholders in WHERE clause to follow SET placeholders
 	whereClause := q.where
 	if q.where != "" && len(q.args) > 0 {
+		// Use a temporary prefix to avoid collisions (e.g., $1 matching $10)
+		tempPrefix := "___PARAM___"
 		for j := len(q.args); j >= 1; j-- {
 			oldPlaceholder := fmt.Sprintf("$%d", j)
-			newPlaceholder := fmt.Sprintf("$%d", j+i-1)
-			whereClause = strings.ReplaceAll(whereClause, oldPlaceholder, newPlaceholder)
+			tempPlaceholder := fmt.Sprintf("%s%d", tempPrefix, j+i-1)
+			whereClause = strings.ReplaceAll(whereClause, oldPlaceholder, tempPlaceholder)
 		}
+		whereClause = strings.ReplaceAll(whereClause, tempPrefix, "$")
 	}
 	args = append(args, q.args...)
 
@@ -221,6 +224,7 @@ func (q *Query) Update(ctx context.Context, values map[string]any) error {
 		strings.Join(sets, ", "),
 		whereClause,
 	)
+
 	_, err := q.db.Exec(ctx, query, args...)
 	return err
 }

@@ -23,21 +23,21 @@ import (
 // FileUseCase defines the interface for file operations
 type FileUseCase interface {
 	// File management operations
-	UploadFile(ctx context.Context, userID int64, file *multipart.FileHeader, req *entity.FileUploadRequest) (*entity.File, error)
-	GetFileByID(ctx context.Context, id int64) (*entity.File, error)
-	GetUserFiles(ctx context.Context, userID int64, page, pageSize int) (*entity.FileListResponse, error)
-	GetUserFilesByCategory(ctx context.Context, userID int64, category string, page, pageSize int) (*entity.FileListResponse, error)
-	GetPublicFiles(ctx context.Context, page, pageSize int) (*entity.FileListResponse, error)
-	GetPrivateFilesByUserID(ctx context.Context, userID int64, page, pageSize int) (*entity.FileListResponse, error)
-	UpdateFile(ctx context.Context, id, userID int64, req *entity.FileUpdateRequest) (*entity.File, error)
-	DeleteFile(ctx context.Context, id, userID int64) error
+	UploadFile(ctx context.Context, schoolID, userID int64, file *multipart.FileHeader, req *entity.FileUploadRequest) (*entity.File, error)
+	GetFileByID(ctx context.Context, schoolID, id int64) (*entity.File, error)
+	GetUserFiles(ctx context.Context, schoolID, userID int64, page, pageSize int) (*entity.FileListResponse, error)
+	GetUserFilesByCategory(ctx context.Context, schoolID, userID int64, category string, page, pageSize int) (*entity.FileListResponse, error)
+	GetPublicFiles(ctx context.Context, schoolID int64, page, pageSize int) (*entity.FileListResponse, error)
+	GetPrivateFilesByUserID(ctx context.Context, schoolID, userID int64, page, pageSize int) (*entity.FileListResponse, error)
+	UpdateFile(ctx context.Context, schoolID, id, userID int64, req *entity.FileUpdateRequest) (*entity.File, error)
+	DeleteFile(ctx context.Context, schoolID, id, userID int64) error
 
 	// Advanced operations
-	DownloadFile(ctx context.Context, id, userID int64) (*entity.FileDownloadResponse, error)
-	DownloadPublicFile(ctx context.Context, id int64) (*entity.FileDownloadResponse, error)
-	GetUserStorageUsage(ctx context.Context, userID int64) (int64, error)
-	SearchFiles(ctx context.Context, userID int64, query string, page, pageSize int) (*entity.FileListResponse, error)
-	SearchPublicFiles(ctx context.Context, query string, page, pageSize int) (*entity.FileListResponse, error)
+	DownloadFile(ctx context.Context, schoolID, id, userID int64) (*entity.FileDownloadResponse, error)
+	DownloadPublicFile(ctx context.Context, schoolID, id int64) (*entity.FileDownloadResponse, error)
+	GetUserStorageUsage(ctx context.Context, schoolID, userID int64) (int64, error)
+	SearchFiles(ctx context.Context, schoolID, userID int64, query string, page, pageSize int) (*entity.FileListResponse, error)
+	SearchPublicFiles(ctx context.Context, schoolID int64, query string, page, pageSize int) (*entity.FileListResponse, error)
 
 	// File validation and utilities
 	ValidateFileType(filename, mimeType string) error
@@ -90,7 +90,7 @@ func NewFileUseCase(
 }
 
 // UploadFile handles file upload with validation and storage
-func (uc *fileUseCase) UploadFile(ctx context.Context, userID int64, fileHeader *multipart.FileHeader, req *entity.FileUploadRequest) (*entity.File, error) {
+func (uc *fileUseCase) UploadFile(ctx context.Context, schoolID, userID int64, fileHeader *multipart.FileHeader, req *entity.FileUploadRequest) (*entity.File, error) {
 	// Validate request
 	if err := uc.validate.Struct(req); err != nil {
 		return nil, fmt.Errorf("validation error: %w", err)
@@ -141,6 +141,7 @@ func (uc *fileUseCase) UploadFile(ctx context.Context, userID int64, fileHeader 
 	// Create file entity
 	file := &entity.File{
 		UserID:       userID,
+		SchoolID:     schoolID,
 		Filename:     uniqueFilename,
 		OriginalName: fileHeader.Filename,
 		MimeType:     mimeType,
@@ -165,8 +166,8 @@ func (uc *fileUseCase) UploadFile(ctx context.Context, userID int64, fileHeader 
 }
 
 // GetFileByID retrieves a file by its ID
-func (uc *fileUseCase) GetFileByID(ctx context.Context, id int64) (*entity.File, error) {
-	file, err := uc.fileRepo.GetByID(ctx, id)
+func (uc *fileUseCase) GetFileByID(ctx context.Context, schoolID, id int64) (*entity.File, error) {
+	file, err := uc.fileRepo.GetByID(ctx, schoolID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -177,16 +178,16 @@ func (uc *fileUseCase) GetFileByID(ctx context.Context, id int64) (*entity.File,
 }
 
 // GetUserFiles retrieves files for a specific user with pagination
-func (uc *fileUseCase) GetUserFiles(ctx context.Context, userID int64, page, pageSize int) (*entity.FileListResponse, error) {
+func (uc *fileUseCase) GetUserFiles(ctx context.Context, schoolID, userID int64, page, pageSize int) (*entity.FileListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0) // totalCount will be calculated after query
 
-	files, err := uc.fileRepo.GetByUserID(ctx, userID, pagination.PageSize, pagination.Offset)
+	files, err := uc.fileRepo.GetByUserID(ctx, schoolID, userID, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		return nil, err
 	}
 
-	totalCount, err := uc.fileRepo.CountByUserID(ctx, userID)
+	totalCount, err := uc.fileRepo.CountByUserID(ctx, schoolID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -204,16 +205,16 @@ func (uc *fileUseCase) GetUserFiles(ctx context.Context, userID int64, page, pag
 }
 
 // GetUserFilesByCategory retrieves files for a specific user and category with pagination
-func (uc *fileUseCase) GetUserFilesByCategory(ctx context.Context, userID int64, category string, page, pageSize int) (*entity.FileListResponse, error) {
+func (uc *fileUseCase) GetUserFilesByCategory(ctx context.Context, schoolID, userID int64, category string, page, pageSize int) (*entity.FileListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0) // totalCount will be calculated after query
 
-	files, err := uc.fileRepo.GetByUserIDAndCategory(ctx, userID, category, pagination.PageSize, pagination.Offset)
+	files, err := uc.fileRepo.GetByUserIDAndCategory(ctx, schoolID, userID, category, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		return nil, err
 	}
 
-	totalCount, err := uc.fileRepo.CountByUserIDAndCategory(ctx, userID, category)
+	totalCount, err := uc.fileRepo.CountByUserIDAndCategory(ctx, schoolID, userID, category)
 	if err != nil {
 		return nil, err
 	}
@@ -231,16 +232,16 @@ func (uc *fileUseCase) GetUserFilesByCategory(ctx context.Context, userID int64,
 }
 
 // GetPublicFiles retrieves public files with pagination
-func (uc *fileUseCase) GetPublicFiles(ctx context.Context, page, pageSize int) (*entity.FileListResponse, error) {
+func (uc *fileUseCase) GetPublicFiles(ctx context.Context, schoolID int64, page, pageSize int) (*entity.FileListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0) // totalCount will be calculated after query
 
-	files, err := uc.fileRepo.GetPublicFiles(ctx, pagination.PageSize, pagination.Offset)
+	files, err := uc.fileRepo.GetPublicFiles(ctx, schoolID, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		return nil, err
 	}
 
-	totalCount, err := uc.fileRepo.CountPublicFiles(ctx)
+	totalCount, err := uc.fileRepo.CountPublicFiles(ctx, schoolID)
 	if err != nil {
 		return nil, err
 	}
@@ -258,16 +259,16 @@ func (uc *fileUseCase) GetPublicFiles(ctx context.Context, page, pageSize int) (
 }
 
 // GetPrivateFilesByUserID retrieves private files for a specific user with pagination
-func (uc *fileUseCase) GetPrivateFilesByUserID(ctx context.Context, userID int64, page, pageSize int) (*entity.FileListResponse, error) {
+func (uc *fileUseCase) GetPrivateFilesByUserID(ctx context.Context, schoolID, userID int64, page, pageSize int) (*entity.FileListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0) // totalCount will be calculated after query
 
-	files, err := uc.fileRepo.GetPrivateFilesByUserID(ctx, userID, pagination.PageSize, pagination.Offset)
+	files, err := uc.fileRepo.GetPrivateFilesByUserID(ctx, schoolID, userID, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		return nil, err
 	}
 
-	totalCount, err := uc.fileRepo.CountPrivateFilesByUserID(ctx, userID)
+	totalCount, err := uc.fileRepo.CountPrivateFilesByUserID(ctx, schoolID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -285,14 +286,14 @@ func (uc *fileUseCase) GetPrivateFilesByUserID(ctx context.Context, userID int64
 }
 
 // UpdateFile updates file metadata
-func (uc *fileUseCase) UpdateFile(ctx context.Context, id, userID int64, req *entity.FileUpdateRequest) (*entity.File, error) {
+func (uc *fileUseCase) UpdateFile(ctx context.Context, schoolID, id, userID int64, req *entity.FileUpdateRequest) (*entity.File, error) {
 	// Validate request
 	if err := uc.validate.Struct(req); err != nil {
 		return nil, fmt.Errorf("validation error: %w", err)
 	}
 
 	// Get existing file
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	file, err := uc.fileRepo.GetByID(ctx, schoolID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +313,7 @@ func (uc *fileUseCase) UpdateFile(ctx context.Context, id, userID int64, req *en
 	file.UpdatedAt = time.Now()
 
 	// Save changes
-	if err := uc.fileRepo.Update(ctx, file); err != nil {
+	if err := uc.fileRepo.Update(ctx, schoolID, file); err != nil {
 		return nil, err
 	}
 
@@ -321,9 +322,9 @@ func (uc *fileUseCase) UpdateFile(ctx context.Context, id, userID int64, req *en
 }
 
 // DeleteFile deletes a file and its physical file
-func (uc *fileUseCase) DeleteFile(ctx context.Context, id, userID int64) error {
+func (uc *fileUseCase) DeleteFile(ctx context.Context, schoolID, id, userID int64) error {
 	// Get file
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	file, err := uc.fileRepo.GetByID(ctx, schoolID, id)
 	if err != nil {
 		return err
 	}
@@ -337,7 +338,7 @@ func (uc *fileUseCase) DeleteFile(ctx context.Context, id, userID int64) error {
 	}
 
 	// Delete from database first
-	if err := uc.fileRepo.Delete(ctx, id); err != nil {
+	if err := uc.fileRepo.Delete(ctx, schoolID, id); err != nil {
 		return err
 	}
 
@@ -352,9 +353,9 @@ func (uc *fileUseCase) DeleteFile(ctx context.Context, id, userID int64) error {
 }
 
 // DownloadFile prepares file for download (user files)
-func (uc *fileUseCase) DownloadFile(ctx context.Context, id, userID int64) (*entity.FileDownloadResponse, error) {
+func (uc *fileUseCase) DownloadFile(ctx context.Context, schoolID, id, userID int64) (*entity.FileDownloadResponse, error) {
 	// Get file
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	file, err := uc.fileRepo.GetByID(ctx, schoolID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -382,9 +383,9 @@ func (uc *fileUseCase) DownloadFile(ctx context.Context, id, userID int64) (*ent
 }
 
 // DownloadPublicFile prepares public file for download
-func (uc *fileUseCase) DownloadPublicFile(ctx context.Context, id int64) (*entity.FileDownloadResponse, error) {
+func (uc *fileUseCase) DownloadPublicFile(ctx context.Context, schoolID, id int64) (*entity.FileDownloadResponse, error) {
 	// Get file
-	file, err := uc.fileRepo.GetByID(ctx, id)
+	file, err := uc.fileRepo.GetByID(ctx, schoolID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -412,20 +413,20 @@ func (uc *fileUseCase) DownloadPublicFile(ctx context.Context, id int64) (*entit
 }
 
 // GetUserStorageUsage calculates total storage usage for a user
-func (uc *fileUseCase) GetUserStorageUsage(ctx context.Context, userID int64) (int64, error) {
-	return uc.fileRepo.GetUserStorageUsage(ctx, userID)
+func (uc *fileUseCase) GetUserStorageUsage(ctx context.Context, schoolID, userID int64) (int64, error) {
+	return uc.fileRepo.GetUserStorageUsage(ctx, schoolID, userID)
 }
 
 // SearchFiles searches user files
-func (uc *fileUseCase) SearchFiles(ctx context.Context, userID int64, query string, page, pageSize int) (*entity.FileListResponse, error) {
+func (uc *fileUseCase) SearchFiles(ctx context.Context, schoolID, userID int64, query string, page, pageSize int) (*entity.FileListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0)
 
 	if query == "" {
-		return uc.GetUserFiles(ctx, userID, pagination.Page, pagination.PageSize)
+		return uc.GetUserFiles(ctx, schoolID, userID, pagination.Page, pagination.PageSize)
 	}
 
-	files, err := uc.fileRepo.SearchFiles(ctx, userID, query, pagination.PageSize, pagination.Offset)
+	files, err := uc.fileRepo.SearchFiles(ctx, schoolID, userID, query, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -444,15 +445,15 @@ func (uc *fileUseCase) SearchFiles(ctx context.Context, userID int64, query stri
 }
 
 // SearchPublicFiles searches public files
-func (uc *fileUseCase) SearchPublicFiles(ctx context.Context, query string, page, pageSize int) (*entity.FileListResponse, error) {
+func (uc *fileUseCase) SearchPublicFiles(ctx context.Context, schoolID int64, query string, page, pageSize int) (*entity.FileListResponse, error) {
 	// Normalize pagination parameters
 	pagination := utils.CalculatePagination(page, pageSize, 0)
 
 	if query == "" {
-		return uc.GetPublicFiles(ctx, pagination.Page, pagination.PageSize)
+		return uc.GetPublicFiles(ctx, schoolID, pagination.Page, pagination.PageSize)
 	}
 
-	files, err := uc.fileRepo.SearchPublicFiles(ctx, query, pagination.PageSize, pagination.Offset)
+	files, err := uc.fileRepo.SearchPublicFiles(ctx, schoolID, query, pagination.PageSize, pagination.Offset)
 	if err != nil {
 		return nil, err
 	}

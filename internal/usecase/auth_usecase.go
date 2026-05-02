@@ -1,7 +1,9 @@
 package usecase
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/delivery/messaging/kafka"
@@ -10,18 +12,20 @@ import (
 	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/repository/redis"
 	"github.com/arisdolanan/demo-gofiber-clean-architecture/pkg/utils"
 	"github.com/go-playground/validator/v10"
+	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
 type AuthUsecase interface {
-	Register(email, password string, schoolID *int64, userType entity.UserType) error
-	Login(email, password string) (*entity.AuthToken, error)
+	Register(email, password string, schoolID pq.Int64Array, userType entity.UserType, ipAddress, userAgent string) error
+	Login(email, password string, ipAddress, userAgent string) (*entity.AuthToken, error)
 	RefreshToken(refreshToken string) (*entity.AuthToken, error)
 	Logout(userID int64, accessToken string) error
-	VerifyToken(token string) (*entity.User, error)
+	VerifyToken(token string) (*entity.UserResponse, error)
 	// Enhanced security methods
 	ValidatePasswordComplexity(password string) error
 	BlacklistToken(token string, expiration time.Duration) error
+	SwitchSchool(ctx context.Context, userID int64, schoolID int64, ipAddress, userAgent string) (*entity.AuthToken, error)
 }
 
 type authUsecase struct {
@@ -34,6 +38,7 @@ type authUsecase struct {
 	accessTTL     time.Duration
 	refreshTTL    time.Duration
 	kafkaProducer *kafka.UserProducer
+	activityLogUC ActivityLogUsecase
 }
 
 func NewAuthUsecase(
@@ -44,6 +49,7 @@ func NewAuthUsecase(
 	log *logrus.Logger,
 	jwtSecret string,
 	kafkaProducer *kafka.UserProducer,
+	activityLogUC ActivityLogUsecase,
 ) AuthUsecase {
 	return &authUsecase{
 		authRepo:      authRepo,
@@ -52,14 +58,15 @@ func NewAuthUsecase(
 		validate:      validate,
 		log:           log,
 		jwtSecret:     jwtSecret,
-		accessTTL:     15 * time.Minute,
+		accessTTL:     8 * time.Hour,
 		refreshTTL:    7 * 24 * time.Hour,
 		kafkaProducer: kafkaProducer,
+		activityLogUC: activityLogUC,
 	}
 }
 
 // Register handles user registration
-func (uc *authUsecase) Register(email, password string, schoolID *int64, userType entity.UserType) error {
+func (uc *authUsecase) Register(email, password string, schoolID pq.Int64Array, userType entity.UserType, ipAddress, userAgent string) error {
 	// Validate password complexity first
 	if err := uc.ValidatePasswordComplexity(password); err != nil {
 		uc.log.Errorf("Password complexity validation failed for %s: %v", email, err)
@@ -86,13 +93,13 @@ func (uc *authUsecase) Register(email, password string, schoolID *int64, userTyp
 
 	// Create user
 	user := &entity.User{
-		Email:       email,
-		Password:    hashedPassword,
-		SchoolID:    schoolID,
-		UserType:    userType,
-		IsActive:    true,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		Email:     email,
+		Password:  hashedPassword,
+		SchoolID:  schoolID,
+		UserType:  userType,
+		IsActive:  true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	if err := uc.authRepo.Register(user); err != nil {
@@ -107,11 +114,28 @@ func (uc *authUsecase) Register(email, password string, schoolID *int64, userTyp
 	}
 
 	uc.log.Infof("User registered successfully: %s", email)
+
+	// Log activity
+	var logSchoolID *int64
+	if len(schoolID) > 0 {
+		logSchoolID = &schoolID[0]
+	}
+
+	_ = uc.activityLogUC.LogActivity(context.Background(), &entity.ActivityLog{
+		UserID:      &user.ID,
+		SchoolID:    logSchoolID,
+		Action:      "REGISTER",
+		Module:      "Auth",
+		Description: fmt.Sprintf("User registered with email: %s", email),
+		IPAddress:   &ipAddress,
+		UserAgent:   &userAgent,
+	})
+
 	return nil
 }
 
 // Login handles user authentication
-func (uc *authUsecase) Login(email, password string) (*entity.AuthToken, error) {
+func (uc *authUsecase) Login(email, password string, ipAddress, userAgent string) (*entity.AuthToken, error) {
 	// Find user by email
 	user, err := uc.authRepo.FindByEmail(email)
 	if err != nil {
@@ -128,14 +152,23 @@ func (uc *authUsecase) Login(email, password string) (*entity.AuthToken, error) 
 		return nil, errors.New("invalid credentials")
 	}
 
+	// Determine active school ID for the session
+	var activeSchoolID int64
+	if len(user.SchoolID) > 0 {
+		activeSchoolID = user.SchoolID[0]
+	} else if user.UserType == entity.UserSuperAdmin {
+		// Super Admin might not have specific schools assigned (global access)
+		activeSchoolID = 0 // Or some system-wide ID
+	}
+
 	// Generate tokens
-	accessToken, err := utils.GenerateToken(user.ID, user.Email, uc.jwtSecret, uc.accessTTL)
+	accessToken, err := utils.GenerateToken(user.ID, user.Email, activeSchoolID, string(user.UserType), uc.jwtSecret, uc.accessTTL)
 	if err != nil {
 		uc.log.Errorf("Error generating access token: %v", err)
 		return nil, err
 	}
 
-	refreshToken, err := utils.GenerateToken(user.ID, user.Email, uc.jwtSecret, uc.refreshTTL)
+	refreshToken, err := utils.GenerateToken(user.ID, user.Email, activeSchoolID, string(user.UserType), uc.jwtSecret, uc.refreshTTL)
 	if err != nil {
 		uc.log.Errorf("Error generating refresh token: %v", err)
 		return nil, err
@@ -151,6 +184,7 @@ func (uc *authUsecase) Login(email, password string) (*entity.AuthToken, error) 
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresAt:    time.Now().Add(uc.accessTTL),
+		User:         entity.NewUserResponse(user),
 	}
 
 	// Send login event to Kafka
@@ -164,18 +198,35 @@ func (uc *authUsecase) Login(email, password string) (*entity.AuthToken, error) 
 	}
 
 	uc.log.Infof("User logged in successfully: %s", email)
+
+	// Log activity
+	var logSchoolID *int64
+	if len(user.SchoolID) > 0 {
+		logSchoolID = &user.SchoolID[0]
+	}
+
+	_ = uc.activityLogUC.LogActivity(context.Background(), &entity.ActivityLog{
+		UserID:      &user.ID,
+		SchoolID:    logSchoolID,
+		Action:      "LOGIN",
+		Module:      "Auth",
+		Description: fmt.Sprintf("User logged in with email: %s", email),
+		IPAddress:   &ipAddress,
+		UserAgent:   &userAgent,
+	})
+
 	return authToken, nil
 }
 
-// VerifyToken validates a token and returns the associated user
-func (uc *authUsecase) VerifyToken(tokenString string) (*entity.User, error) {
+// VerifyToken validates a token and returns the associated user as a safe response DTO
+func (uc *authUsecase) VerifyToken(tokenString string) (*entity.UserResponse, error) {
 	// Validate token
 	claims, err := utils.ValidateToken(tokenString, uc.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	// Find user by ID
+	// Find user by email (loads role, permissions, school)
 	user, err := uc.authRepo.FindByEmail(claims.Email)
 	if err != nil {
 		uc.log.Errorf("Error finding user: %v", err)
@@ -186,7 +237,7 @@ func (uc *authUsecase) VerifyToken(tokenString string) (*entity.User, error) {
 		return nil, errors.New("user not found")
 	}
 
-	return user, nil
+	return entity.NewUserResponse(user), nil
 }
 
 // RefreshToken generates new tokens using a refresh token
@@ -217,14 +268,14 @@ func (uc *authUsecase) RefreshToken(refreshToken string) (*entity.AuthToken, err
 	}
 
 	// Generate new access token
-	accessToken, err := utils.GenerateToken(claims.UserID, claims.Email, uc.jwtSecret, uc.accessTTL)
+	accessToken, err := utils.GenerateToken(claims.UserID, claims.Email, claims.SchoolID, claims.UserType, uc.jwtSecret, uc.accessTTL)
 	if err != nil {
 		uc.log.Errorf("Error generating access token: %v", err)
 		return nil, err
 	}
 
 	// Generate new refresh token
-	newRefreshToken, err := utils.GenerateToken(claims.UserID, claims.Email, uc.jwtSecret, uc.refreshTTL)
+	newRefreshToken, err := utils.GenerateToken(claims.UserID, claims.Email, claims.SchoolID, claims.UserType, uc.jwtSecret, uc.refreshTTL)
 	if err != nil {
 		uc.log.Errorf("Error generating refresh token: %v", err)
 		return nil, err
@@ -272,4 +323,75 @@ func (uc *authUsecase) ValidatePasswordComplexity(password string) error {
 // BlacklistToken adds a token to the blacklist
 func (uc *authUsecase) BlacklistToken(token string, expiration time.Duration) error {
 	return uc.authRedis.BlacklistToken(token, expiration)
+}
+
+// SwitchSchool allows a user to switch their active school context
+func (uc *authUsecase) SwitchSchool(ctx context.Context, userID int64, schoolID int64, ipAddress, userAgent string) (*entity.AuthToken, error) {
+	// Find user by ID to check if they have access to the target school
+	user, err := uc.authRepo.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	// Check if user has access to this school
+	hasAccess := false
+	if user.UserType == entity.UserSuperAdmin {
+		hasAccess = true
+	} else {
+		for _, sID := range user.SchoolID {
+			if sID == schoolID {
+				hasAccess = true
+				break
+			}
+		}
+	}
+
+	if !hasAccess {
+		return nil, errors.New("access denied for this school")
+	}
+
+	// Generate new tokens for the selected school
+	accessToken, err := utils.GenerateToken(user.ID, user.Email, schoolID, string(user.UserType), uc.jwtSecret, uc.accessTTL)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := utils.GenerateToken(user.ID, user.Email, schoolID, string(user.UserType), uc.jwtSecret, uc.refreshTTL)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store new refresh token in Redis
+	if err := uc.authRedis.StoreRefreshToken(user.ID, refreshToken, uc.refreshTTL); err != nil {
+		return nil, err
+	}
+
+	// Update user's School field to reflect the new active school
+	for i, s := range user.AccessibleSchools {
+		if s.ID == schoolID {
+			user.School = &user.AccessibleSchools[i]
+			break
+		}
+	}
+
+	// Log activity
+	_ = uc.activityLogUC.LogActivity(ctx, &entity.ActivityLog{
+		UserID:      &user.ID,
+		SchoolID:    &schoolID,
+		Action:      "SWITCH_SCHOOL",
+		Module:      "Auth",
+		Description: fmt.Sprintf("User switched to school ID: %d", schoolID),
+		IPAddress:   &ipAddress,
+		UserAgent:   &userAgent,
+	})
+
+	return &entity.AuthToken{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    time.Now().Add(uc.accessTTL),
+		User:         entity.NewUserResponse(user),
+	}, nil
 }

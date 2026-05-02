@@ -37,7 +37,9 @@ func (c *AcademicController) CreateSession(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateSession(ctx.Context(), &session); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.CreateSession(ctx.Context(), schoolID, &session); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -63,9 +65,10 @@ func (c *AcademicController) UpdateSession(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&session); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	session.ID = id
 
-	if err := c.usecase.UpdateSession(ctx.Context(), &session); err != nil {
+	if err := c.usecase.UpdateSession(ctx.Context(), schoolID, &session); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -84,7 +87,9 @@ func (c *AcademicController) DeleteSession(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Session ID"})
 	}
 
-	if err := c.usecase.DeleteSession(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteSession(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -98,10 +103,7 @@ func (c *AcademicController) DeleteSession(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/academic/sessions [get]
 func (c *AcademicController) GetSessions(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	sessions, err := c.usecase.GetSessionsBySchool(ctx.Context(), schoolID)
 	if err != nil {
@@ -118,10 +120,7 @@ func (c *AcademicController) GetSessions(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/academic/sessions/active [get]
 func (c *AcademicController) GetActiveSession(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	session, err := c.usecase.GetActiveSession(ctx.Context(), schoolID)
 	if err != nil {
@@ -147,7 +146,9 @@ func (c *AcademicController) CreateClass(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateClass(ctx.Context(), &class); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.CreateClass(ctx.Context(), schoolID, &class); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -173,9 +174,10 @@ func (c *AcademicController) UpdateClass(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&class); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	class.ID = id
 
-	if err := c.usecase.UpdateClass(ctx.Context(), &class); err != nil {
+	if err := c.usecase.UpdateClass(ctx.Context(), schoolID, &class); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -194,7 +196,9 @@ func (c *AcademicController) DeleteClass(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Class ID"})
 	}
 
-	if err := c.usecase.DeleteClass(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteClass(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -208,10 +212,7 @@ func (c *AcademicController) DeleteClass(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/academic/classes [get]
 func (c *AcademicController) GetClasses(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid School ID"})
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	classes, err := c.usecase.GetClassesBySchool(ctx.Context(), schoolID)
 	if err != nil {
@@ -237,7 +238,10 @@ func (c *AcademicController) CreateSection(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateSection(ctx.Context(), &section); err != nil {
+	// Optionally verify class belongs to school or set school_id if section had it
+	// For now, sections are class-based, and we already filter by class/school in repo
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.CreateSection(ctx.Context(), schoolID, &section); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -264,8 +268,8 @@ func (c *AcademicController) UpdateSection(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 	section.ID = id
-
-	if err := c.usecase.UpdateSection(ctx.Context(), &section); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	if err := c.usecase.UpdateSection(ctx.Context(), schoolID, &section); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -284,7 +288,9 @@ func (c *AcademicController) DeleteSection(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Section ID"})
 	}
 
-	if err := c.usecase.DeleteSection(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteSection(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -298,12 +304,13 @@ func (c *AcademicController) DeleteSection(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/academic/sections [get]
 func (c *AcademicController) GetSections(ctx *fiber.Ctx) error {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	classIDStr := ctx.Query("class_id")
 	sessionIDStr := ctx.Query("academic_session_id")
 
 	// If no filters are provided, return all sections
 	if classIDStr == "" && sessionIDStr == "" {
-		sections, err := c.usecase.GetAllSections(ctx.Context())
+		sections, err := c.usecase.GetAllSections(ctx.Context(), schoolID)
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 		}
@@ -315,7 +322,7 @@ func (c *AcademicController) GetSections(ctx *fiber.Ctx) error {
 		if err != nil {
 			return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Session ID"})
 		}
-		sections, err := c.usecase.GetSectionsBySession(ctx.Context(), sessionID)
+		sections, err := c.usecase.GetSectionsBySession(ctx.Context(), schoolID, sessionID)
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 		}
@@ -327,7 +334,7 @@ func (c *AcademicController) GetSections(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Class ID"})
 	}
 
-	sections, err := c.usecase.GetSectionsByClass(ctx.Context(), classID)
+	sections, err := c.usecase.GetSectionsByClass(ctx.Context(), schoolID, classID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -351,7 +358,9 @@ func (c *AcademicController) CreateSubject(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.CreateSubject(ctx.Context(), &subject); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.CreateSubject(ctx.Context(), schoolID, &subject); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -377,9 +386,10 @@ func (c *AcademicController) UpdateSubject(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&subject); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 	subject.ID = id
 
-	if err := c.usecase.UpdateSubject(ctx.Context(), &subject); err != nil {
+	if err := c.usecase.UpdateSubject(ctx.Context(), schoolID, &subject); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -398,7 +408,9 @@ func (c *AcademicController) DeleteSubject(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Subject ID"})
 	}
 
-	if err := c.usecase.DeleteSubject(ctx.Context(), id); err != nil {
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
+	if err := c.usecase.DeleteSubject(ctx.Context(), schoolID, id); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -412,10 +424,7 @@ func (c *AcademicController) DeleteSubject(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse
 // @Router /api/v1/academic/subjects [get]
 func (c *AcademicController) GetSubjects(ctx *fiber.Ctx) error {
-	schoolID, err := utils.ParseInt64(ctx.Query("school_id"))
-	if err != nil || schoolID == 0 {
-		schoolID = 1 // default to first school
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
 	subjects, err := c.usecase.GetSubjectsBySchool(ctx.Context(), schoolID)
 	if err != nil {

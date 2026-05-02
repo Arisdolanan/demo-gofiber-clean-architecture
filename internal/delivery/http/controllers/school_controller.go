@@ -21,6 +21,28 @@ func NewSchoolController(uc usecase.SchoolUsecase, log *logrus.Logger) *SchoolCo
 	}
 }
 
+// GetAllSchools retrieves all registered schools
+// @Summary List all schools
+// @Tags schools
+// @Produce json
+// @Success 200 {object} response.HTTPSuccessResponse{data=[]entity.School}
+// @Router /api/v1/schools [get]
+func (c *SchoolController) GetAllSchools(ctx *fiber.Ctx) error {
+	schools, err := c.usecase.GetAllSchools(ctx.Context())
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
+			Status:  fiber.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusOK,
+		Message: "Schools retrieved successfully",
+		Data:    schools,
+	})
+}
+
 // RegisterSchool handles school onboarding
 // @Summary Register a new school
 // @Tags schools
@@ -125,5 +147,35 @@ func (c *SchoolController) AssignLicense(ctx *fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "License assigned successfully",
 		Data:    license,
+	})
+}
+
+// UpdateSchool updates school information
+// @Summary Update school details
+// @Tags schools
+// @Param id path int true "School ID"
+// @Param school body entity.School true "School information"
+// @Success 200 {object} response.HTTPSuccessResponse{data=entity.School}
+// @Router /api/v1/schools/{id} [put]
+func (c *SchoolController) UpdateSchool(ctx *fiber.Ctx) error {
+	id, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid ID"})
+	}
+
+	var school entity.School
+	if err := ctx.BodyParser(&school); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
+	}
+	school.ID = id
+
+	if err := c.usecase.UpdateSchool(ctx.Context(), &school); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusOK,
+		Message: "School updated successfully",
+		Data:    school,
 	})
 }

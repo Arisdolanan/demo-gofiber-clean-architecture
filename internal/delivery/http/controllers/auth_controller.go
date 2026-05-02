@@ -60,7 +60,10 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 		})
 	}
 
-	if err := c.authUsecase.Register(req.Email, req.Password, req.SchoolID, req.UserType); err != nil {
+	ipAddress := ctx.IP()
+	userAgent := ctx.Get("User-Agent")
+
+	if err := c.authUsecase.Register(req.Email, req.Password, req.SchoolID, req.UserType, ipAddress, userAgent); err != nil {
 		c.log.Errorf("Registration error: %v", err)
 
 		// Check if it's a password complexity error
@@ -130,7 +133,10 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	authToken, err := c.authUsecase.Login(req.Email, req.Password)
+	ipAddress := ctx.IP()
+	userAgent := ctx.Get("User-Agent")
+
+	authToken, err := c.authUsecase.Login(req.Email, req.Password, ipAddress, userAgent)
 	if err != nil {
 		c.log.Errorf("Login error: %v", err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(response.HTTPErrorResponse{
@@ -160,13 +166,19 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 // @Failure 401 {object} response.HTTPErrorResponse "Unauthorized"
 // @Router /api/v1/auth/verify [get]
 func (c *AuthController) Verify(ctx *fiber.Ctx) error {
-	// Get user from context (set by middleware)
-	userID := ctx.Locals("user_id").(int64)
-	email := ctx.Locals("email").(string)
+	// Get token from context (set by middleware)
+	token := ctx.Locals("token").(string)
 
-	user := &entity.User{
-		ID:    userID,
-		Email: email,
+	user, err := c.authUsecase.VerifyToken(token)
+	if err != nil {
+		c.log.Errorf("Token verification error: %v", err)
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.HTTPErrorResponse{
+			Status:  fiber.StatusUnauthorized,
+			Message: "Unauthorized",
+			Errors: []response.JSONError{
+				{Status: fiber.StatusUnauthorized, Message: err.Error()},
+			},
+		})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{
@@ -262,5 +274,49 @@ func (c *AuthController) Logout(ctx *fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "Logout successful",
 		Data:    nil,
+	})
+}
+
+// SwitchSchool handles switching the active school context
+// @Summary Switch active school
+// @Description Switch the active school context and get a new token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body entity.SwitchSchoolRequest true "Target school ID"
+// @Success 200 {object} response.HTTPSuccessResponse{data=entity.AuthToken} "School switched successfully"
+// @Failure 400 {object} response.HTTPErrorResponse "Invalid request body"
+// @Failure 401 {object} response.HTTPErrorResponse "Unauthorized"
+// @Failure 403 {object} response.HTTPErrorResponse "Access denied"
+// @Router /api/v1/auth/switch-school [post]
+func (c *AuthController) SwitchSchool(ctx *fiber.Ctx) error {
+	var req entity.SwitchSchoolRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
+			Status:  fiber.StatusBadRequest,
+			Message: "Invalid request body",
+			Errors: []response.JSONError{{Status: fiber.StatusBadRequest, Message: err.Error()}},
+		})
+	}
+
+	userID := ctx.Locals("user_id").(int64)
+	ipAddress := ctx.IP()
+	userAgent := ctx.Get("User-Agent")
+
+	authToken, err := c.authUsecase.SwitchSchool(ctx.Context(), userID, req.SchoolID, ipAddress, userAgent)
+	if err != nil {
+		c.log.Errorf("Switch school error: %v", err)
+		return ctx.Status(fiber.StatusForbidden).JSON(response.HTTPErrorResponse{
+			Status:  fiber.StatusForbidden,
+			Message: "Failed to switch school",
+			Errors: []response.JSONError{{Status: fiber.StatusForbidden, Message: err.Error()}},
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusOK,
+		Message: "School switched successfully",
+		Data:    authToken,
 	})
 }

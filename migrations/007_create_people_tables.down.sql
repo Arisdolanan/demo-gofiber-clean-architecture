@@ -10,3 +10,7 @@ DROP TABLE IF EXISTS teachers;
 
 DROP TYPE IF EXISTS student_status;
 DROP TYPE IF EXISTS teacher_status;
+
+-- Down Migration: Remove Staff Table
+DROP TABLE IF EXISTS staff CASCADE;
+DROP TYPE IF EXISTS staff_status;

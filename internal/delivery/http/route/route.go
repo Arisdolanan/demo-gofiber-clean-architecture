@@ -2,6 +2,8 @@ package route
 
 import (
 	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/delivery/http/controllers"
+	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/delivery/http/middleware"
+	"github.com/arisdolanan/demo-gofiber-clean-architecture/internal/usecase"
 	"github.com/arisdolanan/demo-gofiber-clean-architecture/pkg/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
@@ -9,20 +11,23 @@ import (
 )
 
 type RouteConfig struct {
-	App                 *fiber.App
-	AuthMiddleware      fiber.Handler
-	AuthController      *controllers.AuthController
-	EmailController     *controllers.EmailController
-	UserController      *controllers.UserController
-	PDFController       *controllers.PDFController
-	ExcelController     *controllers.ExcelController
-	FileController      *controllers.FileController
-	SchoolController    *controllers.SchoolController
-	RBACController      *controllers.RBACController
-	AcademicController  *controllers.AcademicController
-	PeopleController    *controllers.PeopleController
-	OperationController *controllers.OperationController
-	ClientLogController *controllers.ClientLogController
+	App                   *fiber.App
+	AuthMiddleware        fiber.Handler
+	AuthController        *controllers.AuthController
+	EmailController       *controllers.EmailController
+	UserController        *controllers.UserController
+	PDFController         *controllers.PDFController
+	ExcelController       *controllers.ExcelController
+	FileController        *controllers.FileController
+	SchoolController      *controllers.SchoolController
+	RBACController        *controllers.RBACController
+	AcademicController    *controllers.AcademicController
+	PeopleController      *controllers.PeopleController
+	OperationController   *controllers.OperationController
+	SettingController     *controllers.SettingController
+	BackupController      *controllers.BackupController
+	ActivityLogController *controllers.ActivityLogController
+	ActivityLogUsecase    usecase.ActivityLogUsecase
 }
 
 func (c *RouteConfig) Setup() {
@@ -51,11 +56,10 @@ func (c *RouteConfig) SetupGuestRoute() {
 	// Public file routes (no authentication required)
 	c.App.Get("/api/v1/files/public", c.FileController.GetPublicFiles)
 
-	// Client error logging routes (public - no authentication required)
-	// This allows frontend/mobile apps to send error logs even when not authenticated
-	clientLogs := c.App.Group("/api/v1/client-logs")
-	clientLogs.Post("/error", c.ClientLogController.LogError)
-	clientLogs.Post("/info", c.ClientLogController.LogInfo)
+	// Diagnostic route to verify backend version
+	c.App.Get("/ping-test", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("PONG - Backend Updated: " + ctx.IP())
+	})
 }
 
 func (c *RouteConfig) SetupAuthRoute() {
@@ -74,19 +78,25 @@ func (c *RouteConfig) SetupAuthRoute() {
 	// Protected auth routes (with JWT middleware)
 	auth.Get("/verify", c.AuthMiddleware, c.AuthController.Verify)
 	auth.Post("/logout", c.AuthMiddleware, c.AuthController.Logout)
+	auth.Post("/switch-school", c.AuthMiddleware, c.AuthController.SwitchSchool)
 
-	// Create a protected API group with authentication middleware
-	api := c.App.Group("/api/v1", c.AuthMiddleware)
+	// Create a protected API group with authentication and activity logging middleware
+	api := c.App.Group("/api/v1", c.AuthMiddleware, middleware.ActivityLogger(c.ActivityLogUsecase))
 
-	// Test route for protected area
-	api.Get("/auth", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("Hello, World!")
+	// Diagnostic route for protected area
+	api.Get("/auth-test", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("Hello, Authenticated World!")
 	})
+
+	// Activity Logs (protected) - Moved up for priority
+	activity := api.Group("/activity-logs")
+	activity.Get("", c.ActivityLogController.GetActivities)
+	activity.Get("/deletions", c.ActivityLogController.GetDeletions)
 
 	// User routes (protected)
 	users := api.Group("/users")
-	users.Post("/", c.UserController.CreateUser)
-	users.Get("/", c.UserController.GetAllUsers)
+	users.Post("", c.UserController.CreateUser)
+	users.Get("", c.UserController.GetAllUsers)
 	users.Get("/:id", c.UserController.GetUserByID)
 	users.Put("/:id", c.UserController.UpdateUser)
 	users.Delete("/:id", c.UserController.DeleteUser)
@@ -115,18 +125,32 @@ func (c *RouteConfig) SetupAuthRoute() {
 	admin := api.Group("/admin")
 	admin.Post("/cleanup-tokens", c.EmailController.CleanupExpiredTokens)
 
+	// Settings routes (protected)
+	settings := api.Group("/settings")
+	settings.Get("", c.SettingController.GetSettings)
+	settings.Put("", c.SettingController.UpdateSettings)
+
+	// Backup routes (protected)
+	backup := api.Group("/backup")
+	backup.Get("/list", c.BackupController.GetBackups)
+	backup.Post("/manual", c.BackupController.CreateManualBackup)
+	backup.Post("/restore", c.BackupController.RestoreBackup)
+
 	// School & SaaS (protected)
-	schools := api.Group("/schools")
-	schools.Post("/", c.SchoolController.RegisterSchool)
-	schools.Get("/:id", c.SchoolController.GetSchoolByID)
-	schools.Post("/packages", c.SchoolController.CreatePackage)
-	schools.Post("/:id/license", c.SchoolController.AssignLicense)
+	api.Post("/schools", c.SchoolController.RegisterSchool)
+	api.Get("/schools", c.SchoolController.GetAllSchools)
+	api.Get("/schools/:id", c.SchoolController.GetSchoolByID)
+	api.Put("/schools/:id", c.SchoolController.UpdateSchool)
+	api.Post("/schools/packages", c.SchoolController.CreatePackage)
+	api.Post("/schools/:id/license", c.SchoolController.AssignLicense)
 
 	// RBAC (protected)
 	rbac := api.Group("/rbac")
 	rbac.Post("/roles", c.RBACController.CreateRole)
 	rbac.Get("/roles", c.RBACController.GetRoles)
 	rbac.Post("/roles/:id/permissions", c.RBACController.AssignPermission)
+	rbac.Get("/roles/:id/permissions", c.RBACController.GetRolePermissions)
+	rbac.Get("/permissions", c.RBACController.GetPermissions)
 	rbac.Post("/users/:user_id/roles", c.RBACController.AssignRoleToUser)
 	rbac.Get("/users/:user_id/roles", c.RBACController.GetUserRoles)
 
@@ -159,24 +183,26 @@ func (c *RouteConfig) SetupAuthRoute() {
 	people.Put("/teachers/:id", c.PeopleController.UpdateTeacher)
 	people.Get("/teachers", c.PeopleController.GetTeachers)
 	people.Get("/teachers/users/:user_id", c.PeopleController.GetTeacherByUserID)
+	people.Delete("/teachers/:id", c.PeopleController.DeleteTeacher)
 
 	people.Post("/students", c.PeopleController.CreateStudent)
 	people.Put("/students/:id", c.PeopleController.UpdateStudent)
 	people.Get("/students/list", c.PeopleController.GetAllStudents)
+	people.Get("/students/:id", c.PeopleController.GetStudentByID)
 	people.Get("/students/users/:user_id", c.PeopleController.GetStudentByUserID)
+	people.Delete("/students/:id", c.PeopleController.DeleteStudent)
 	people.Get("/students/:student_id/sections", c.PeopleController.GetStudentSections)
 	people.Get("/sections/:section_id/students", c.PeopleController.GetStudentsBySection)
 	people.Post("/enroll", c.PeopleController.EnrollStudent)
 
-	people.Post("/parents", c.PeopleController.CreateParent)
-	people.Get("/parents", c.PeopleController.GetParents)
-	people.Put("/parents/:id", c.PeopleController.UpdateParent)
-	people.Delete("/parents/:id", c.PeopleController.DeleteParent)
-	people.Post("/parents/link", c.PeopleController.LinkParentToStudent)
+	// Parent routes (Management now unified in Student Form)
+	people.Get("/parents/search", c.PeopleController.SearchParents)
+	// standalone parent creation/update removed as per user request
 
 	people.Post("/staff", c.PeopleController.CreateStaff)
 	people.Put("/staff/:id", c.PeopleController.UpdateStaff)
 	people.Get("/staff", c.PeopleController.GetStaff)
+	people.Get("/staff/users/:user_id", c.PeopleController.GetStaffByUserID)
 	people.Delete("/staff/:id", c.PeopleController.DeleteStaff)
 
 	// Operations (protected)
@@ -211,4 +237,6 @@ func (c *RouteConfig) SetupAuthRoute() {
 	ops.Get("/notifications", c.OperationController.GetNotifications)
 	ops.Get("/report-card", c.OperationController.GetReportCard)
 	ops.Get("/report-card/section", c.OperationController.GetSectionReportCards)
+
+	ops.Get("/integrations/definitions", c.OperationController.GetIntegrationDefinitions)
 }

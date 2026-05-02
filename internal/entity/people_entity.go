@@ -51,40 +51,64 @@ type Student struct {
 	Email         *string       `json:"email,omitempty" db:"email"`
 	Address       *string       `json:"address,omitempty" db:"address"`
 	AdmissionDate *time.Time    `json:"admission_date,omitempty" db:"admission_date"`
-	Status        StudentStatus `json:"status" db:"status"`
+	Status            StudentStatus `json:"status" db:"status"`
+	SectionID         *int64        `json:"section_id,omitempty" db:"-"`
+	AcademicSessionID *int64        `json:"academic_session_id,omitempty" db:"-"`
+	Parents           []StudentParentRequest `json:"parents,omitempty" db:"-"`
 	BaseEntity
 }
 
+type StudentParentRequest struct {
+	ParentID     int64   `json:"parent_id,omitempty" db:"parent_id"`
+	Relationship string  `json:"relationship" db:"relationship"`
+	IsPrimary    bool    `json:"is_primary" db:"is_primary"`
+	// Fields for new parent creation if ParentID is 0
+	FullName     *string `json:"full_name,omitempty" db:"full_name"`
+	Phone        *string `json:"phone,omitempty" db:"phone"`
+	Email        *string `json:"email,omitempty" db:"email"`
+	Address      *string `json:"address,omitempty" db:"address"`
+	Occupation   *string `json:"occupation,omitempty" db:"occupation"`
+}
+
 type Parent struct {
-	ID         int64   `json:"id" db:"id"`
-	UserID     int64   `json:"user_id" db:"user_id"`
-	SchoolID   int64   `json:"school_id" db:"school_id"`
-	FullName   *string `json:"full_name,omitempty" db:"full_name" validate:"required"`
-	Phone      *string `json:"phone,omitempty" db:"phone"`
-	Email      *string `json:"email,omitempty" db:"email"`
-	Address    *string `json:"address,omitempty" db:"address"`
-	Occupation *string `json:"occupation,omitempty" db:"occupation"`
+	ID         int64         `json:"id" db:"id"`
+	UserID     *int64        `json:"user_id" db:"user_id"`
+	SchoolID   int64         `json:"school_id" db:"school_id"`
+	FullName   *string       `json:"full_name,omitempty" db:"full_name" validate:"required"`
+	Phone      *string       `json:"phone,omitempty" db:"phone"`
+	Email      *string       `json:"email,omitempty" db:"email"`
+	Address    *string       `json:"address,omitempty" db:"address"`
+	Occupation *string       `json:"occupation,omitempty" db:"occupation"`
+	Children   []ParentChild `json:"children,omitempty" db:"-"`
 	BaseEntity
+}
+
+type ParentChild struct {
+	ID            int64  `json:"id" db:"id"`
+	FullName      string `json:"full_name" db:"full_name"`
+	StudentNumber string `json:"student_number" db:"student_number"`
+	Relationship  string `json:"relationship" db:"relationship"`
+	IsPrimary     bool   `json:"is_primary" db:"is_primary"`
 }
 
 type StudentParent struct {
 	ID           int64  `json:"id" db:"id"`
+	SchoolID     int64  `json:"school_id" db:"school_id"`
 	StudentID    int64  `json:"student_id" db:"student_id"`
 	ParentID     int64  `json:"parent_id" db:"parent_id"`
 	Relationship string `json:"relationship" db:"relationship"` // father, mother, guardian
 	IsPrimary    bool   `json:"is_primary" db:"is_primary"`
-	BaseEntity
 }
 
 type StudentSection struct {
 	ID                int64      `json:"id" db:"id"`
+	SchoolID          int64      `json:"school_id" db:"school_id"`
 	StudentID         int64      `json:"student_id" db:"student_id"`
 	SectionID         int64      `json:"section_id" db:"section_id"`
 	AcademicSessionID int64      `json:"academic_session_id" db:"academic_session_id"`
 	RollNumber        *string    `json:"roll_number,omitempty" db:"roll_number"`
 	EnrollmentDate    *time.Time `json:"enrollment_date,omitempty" db:"enrollment_date"`
 	Status            *string    `json:"status,omitempty" db:"status"` // active, promoted, transferred
-	BaseEntity
 }
 
 type StaffStatus string
@@ -110,4 +134,17 @@ type Staff struct {
 	JoinDate       *time.Time  `json:"join_date,omitempty" db:"join_date"`
 	Status         StaffStatus `json:"status" db:"status"`
 	BaseEntity
+}
+
+type EmployeeUserResponse struct {
+	EmployeeID int64  `json:"employee_id,omitempty"`
+	UserID     int64  `json:"user_id"`
+	Username   string `json:"username"`
+	Password   string `json:"password,omitempty"`
+	UserType   string `json:"user_type,omitempty"` // "teacher", "staff", "student", "parent"
+}
+
+type EnrollmentCredentials struct {
+	Student *EmployeeUserResponse   `json:"student"`
+	Parents []*EmployeeUserResponse `json:"parents"`
 }

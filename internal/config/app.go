@@ -62,6 +62,9 @@ func Bootstrap(cfg *BootstrapConfig) {
 	academicRepo := postgresql.NewAcademicRepository(cfg.DB)
 	peopleRepo := postgresql.NewPeopleRepository(cfg.DB)
 	operationRepo := postgresql.NewOperationRepository(cfg.DB)
+	settingRepo := postgresql.NewSettingRepository(cfg.DB)
+	backupRepo := postgresql.NewBackupRepository(cfg.DB.DB)
+	activityLogRepo := postgresql.NewActivityLogRepository(cfg.DB)
 
 	// Get JWT secret from Viper
 	jwtSecret := configuration.GetJWTSecret()
@@ -77,16 +80,19 @@ func Bootstrap(cfg *BootstrapConfig) {
 
 	// Initialize usecase
 	emailUsecase := usecase.NewEmailUsecase(emailRepo, userRepo, emailService, cfg.Log)
-	authUsecase := usecase.NewAuthUsecase(authRepo, authRedisRepo, emailUsecase, cfg.Validate, cfg.Log, jwtSecret, kafkaUserProducer)
-	userUsecase := usecase.NewUserUseCase(userRepo, cfg.Redis, cfg.Log, cfg.Validate)
+	activityLogUsecase := usecase.NewActivityLogUsecase(activityLogRepo, cfg.Log)
+	authUsecase := usecase.NewAuthUsecase(authRepo, authRedisRepo, emailUsecase, cfg.Validate, cfg.Log, jwtSecret, kafkaUserProducer, activityLogUsecase)
+	userUsecase := usecase.NewUserUseCase(userRepo, roleRepo, cfg.Redis, cfg.Log, cfg.Validate)
 	fileUsecase := usecase.NewFileUseCase(fileRepo, cfg.Log, cfg.Validate)
 	pdfUsecase := usecase.NewPDFUsecase(cfg.Log)
 	excelUsecase := usecase.NewExcelUsecase(cfg.Log)
 	schoolUsecase := usecase.NewSchoolUsecase(schoolRepo, cfg.Validate, cfg.Log)
 	rbacUsecase := usecase.NewRBACUsecase(roleRepo, permRepo, cfg.Validate, cfg.Log)
 	academicUsecase := usecase.NewAcademicUsecase(academicRepo, cfg.Validate, cfg.Log)
-	peopleUsecase := usecase.NewPeopleUsecase(peopleRepo, cfg.Validate, cfg.Log)
+	peopleUsecase := usecase.NewPeopleUsecase(peopleRepo, userUsecase, cfg.Validate, cfg.Log)
 	operationUsecase := usecase.NewOperationUsecase(operationRepo, peopleRepo, cfg.Validate, cfg.Log)
+	settingUsecase := usecase.NewSettingUseCase(settingRepo, cfg.Log, cfg.Validate)
+	backupUsecase := usecase.NewBackupUseCase(backupRepo, cfg.Log)
 
 	// Initialize controller
 	authController := controllers.NewAuthController(authUsecase, cfg.Validate, cfg.Log)
@@ -100,7 +106,9 @@ func Bootstrap(cfg *BootstrapConfig) {
 	academicController := controllers.NewAcademicController(academicUsecase, cfg.Log)
 	peopleController := controllers.NewPeopleController(peopleUsecase, cfg.Log)
 	operationController := controllers.NewOperationController(operationUsecase, cfg.Log)
-	clientLogController := controllers.NewClientLogController(cfg.Log)
+	settingController := controllers.NewSettingController(settingUsecase, cfg.Log)
+	backupController := controllers.NewBackupController(backupUsecase, cfg.Log)
+	activityLogController := controllers.NewActivityLogController(activityLogUsecase, cfg.Log)
 
 	// Initialize middleware with blacklisting support
 	authMiddleware := middleware.JWTProtectedWithBlacklist(jwtSecret, authRedisRepo)
@@ -122,7 +130,10 @@ func Bootstrap(cfg *BootstrapConfig) {
 		AcademicController:  academicController,
 		PeopleController:    peopleController,
 		OperationController: operationController,
-		ClientLogController: clientLogController,
+		SettingController:   settingController,
+		BackupController:    backupController,
+		ActivityLogController: activityLogController,
+		ActivityLogUsecase:    activityLogUsecase,
 	}
 	routeConfig.Setup()
 }

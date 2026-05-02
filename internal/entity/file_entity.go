@@ -5,6 +5,7 @@ import "time"
 // File represents a file in the system
 type File struct {
 	ID           int64      `json:"id" db:"id"`
+	SchoolID     int64      `json:"school_id" db:"school_id"`
 	UserID       int64      `json:"user_id" db:"user_id"`
 	Filename     string     `json:"filename" db:"filename" validate:"required,min=1,max=255"`
 	OriginalName string     `json:"original_name" db:"original_name" validate:"required,min=1,max=255"`

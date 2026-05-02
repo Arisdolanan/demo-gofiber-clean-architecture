@@ -35,6 +35,9 @@ func (c *RBACController) CreateRole(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	role.SchoolID = &schoolID
+
 	if err := c.usecase.CreateRole(ctx.Context(), &role); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -52,16 +55,10 @@ func (c *RBACController) CreateRole(ctx *fiber.Ctx) error {
 // @Success 200 {object} response.HTTPSuccessResponse{data=[]entity.Role}
 // @Router /api/v1/rbac/roles [get]
 func (c *RBACController) GetRoles(ctx *fiber.Ctx) error {
-	var schoolID *int64
-	idStr := ctx.Query("school_id")
-	if idStr != "" {
-		id, err := utils.ParseInt64(idStr)
-		if err == nil {
-			schoolID = &id
-		}
-	}
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+	schoolIDPtr := &schoolID
 
-	roles, err := c.usecase.GetRolesBySchool(ctx.Context(), schoolID)
+	roles, err := c.usecase.GetRolesBySchool(ctx.Context(), schoolIDPtr)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -124,7 +121,12 @@ func (c *RBACController) AssignRoleToUser(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid body"})
 	}
 
-	if err := c.usecase.AssignRoleToUser(ctx.Context(), userID, body.RoleID); err != nil {
+	schoolID, err := utils.GetSchoolIDFromToken(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.HTTPErrorResponse{Status: fiber.StatusUnauthorized, Message: "Unauthorized"})
+	}
+
+	if err := c.usecase.AssignRoleToUser(ctx.Context(), schoolID, userID, body.RoleID); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 
@@ -147,7 +149,12 @@ func (c *RBACController) GetUserRoles(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid User ID"})
 	}
 
-	roles, err := c.usecase.GetUserRoles(ctx.Context(), userID)
+	schoolID, err := utils.GetSchoolIDFromToken(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.HTTPErrorResponse{Status: fiber.StatusUnauthorized, Message: "Unauthorized"})
+	}
+
+	roles, err := c.usecase.GetUserRoles(ctx.Context(), schoolID, userID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -156,5 +163,47 @@ func (c *RBACController) GetUserRoles(ctx *fiber.Ctx) error {
 		Status:  fiber.StatusOK,
 		Message: "User roles retrieved successfully",
 		Data:    roles,
+	})
+}
+
+// GetPermissions retrieves all permissions
+// @Summary Get permissions
+// @Tags rbac
+// @Success 200 {object} response.HTTPSuccessResponse{data=[]entity.Permission}
+// @Router /api/v1/rbac/permissions [get]
+func (c *RBACController) GetPermissions(ctx *fiber.Ctx) error {
+	permissions, err := c.usecase.GetAllPermissions(ctx.Context())
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusOK,
+		Message: "Permissions retrieved successfully",
+		Data:    permissions,
+	})
+}
+
+// GetRolePermissions retrieves permissions for a specific role
+// @Summary Get role permissions
+// @Tags rbac
+// @Param id path int true "Role ID"
+// @Success 200 {object} response.HTTPSuccessResponse{data=[]entity.Permission}
+// @Router /api/v1/rbac/roles/{id}/permissions [get]
+func (c *RBACController) GetRolePermissions(ctx *fiber.Ctx) error {
+	roleID, err := utils.ParseInt64FromParam(ctx, "id")
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{Status: fiber.StatusBadRequest, Message: "Invalid Role ID"})
+	}
+
+	permissions, err := c.usecase.GetRolePermissions(ctx.Context(), roleID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{Status: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.HTTPSuccessResponse{
+		Status:  fiber.StatusOK,
+		Message: "Role permissions retrieved successfully",
+		Data:    permissions,
 	})
 }

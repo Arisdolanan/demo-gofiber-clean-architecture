@@ -13,12 +13,13 @@ type RBACUsecase interface {
 	CreateRole(ctx context.Context, role *entity.Role) error
 	GetRolesBySchool(ctx context.Context, schoolID *int64) ([]*entity.Role, error)
 	AssignPermissionToRole(ctx context.Context, roleID, permissionID int64) error
+	GetRolePermissions(ctx context.Context, roleID int64) ([]*entity.Permission, error)
 
 	// User assignments
-	AssignRoleToUser(ctx context.Context, userID, roleID int64) error
-	GetUserRoles(ctx context.Context, userID int64) ([]*entity.Role, error)
-	GetUserPermissions(ctx context.Context, userID int64) ([]string, error)
-	CheckPermission(ctx context.Context, userID int64, permissionCode string) (bool, error)
+	AssignRoleToUser(ctx context.Context, schoolID int64, userID, roleID int64) error
+	GetUserRoles(ctx context.Context, schoolID int64, userID int64) ([]*entity.Role, error)
+	GetUserPermissions(ctx context.Context, schoolID int64, userID int64) ([]string, error)
+	CheckPermission(ctx context.Context, schoolID int64, userID int64, permissionCode string) (bool, error)
 
 	// Permission management
 	CreatePermission(ctx context.Context, perm *entity.Permission) error
@@ -56,16 +57,20 @@ func (uc *rbacUsecase) AssignPermissionToRole(ctx context.Context, roleID, permi
 	return uc.roleRepo.AssignPermission(ctx, roleID, permissionID)
 }
 
-func (uc *rbacUsecase) AssignRoleToUser(ctx context.Context, userID, roleID int64) error {
-	return uc.roleRepo.AssignUserRole(ctx, userID, roleID)
+func (uc *rbacUsecase) GetRolePermissions(ctx context.Context, roleID int64) ([]*entity.Permission, error) {
+	return uc.roleRepo.GetRolePermissions(ctx, roleID)
 }
 
-func (uc *rbacUsecase) GetUserRoles(ctx context.Context, userID int64) ([]*entity.Role, error) {
-	return uc.roleRepo.GetUserRoles(ctx, userID)
+func (uc *rbacUsecase) AssignRoleToUser(ctx context.Context, schoolID int64, userID, roleID int64) error {
+	return uc.roleRepo.AssignUserRole(ctx, schoolID, userID, roleID)
 }
 
-func (uc *rbacUsecase) GetUserPermissions(ctx context.Context, userID int64) ([]string, error) {
-	roles, err := uc.roleRepo.GetUserRoles(ctx, userID)
+func (uc *rbacUsecase) GetUserRoles(ctx context.Context, schoolID int64, userID int64) ([]*entity.Role, error) {
+	return uc.roleRepo.GetUserRoles(ctx, schoolID, userID)
+}
+
+func (uc *rbacUsecase) GetUserPermissions(ctx context.Context, schoolID int64, userID int64) ([]string, error) {
+	roles, err := uc.roleRepo.GetUserRoles(ctx, schoolID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +95,8 @@ func (uc *rbacUsecase) GetUserPermissions(ctx context.Context, userID int64) ([]
 	return uniquePerms, nil
 }
 
-func (uc *rbacUsecase) CheckPermission(ctx context.Context, userID int64, permissionCode string) (bool, error) {
-	perms, err := uc.GetUserPermissions(ctx, userID)
+func (uc *rbacUsecase) CheckPermission(ctx context.Context, schoolID int64, userID int64, permissionCode string) (bool, error) {
+	perms, err := uc.GetUserPermissions(ctx, schoolID, userID)
 	if err != nil {
 		return false, err
 	}

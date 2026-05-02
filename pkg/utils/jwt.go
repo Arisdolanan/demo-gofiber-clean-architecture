@@ -10,16 +10,20 @@ import (
 )
 
 type JWTClaims struct {
-	UserID int64  `json:"user_id"`
-	Email  string `json:"email"`
+	UserID   int64  `json:"user_id"`
+	Email    string `json:"email"`
+	SchoolID int64  `json:"school_id"`
+	UserType string `json:"user_type"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken generates a JWT token
-func GenerateToken(userID int64, email, secret string, expiration time.Duration) (string, error) {
+func GenerateToken(userID int64, email string, schoolID int64, userType string, secret string, expiration time.Duration) (string, error) {
 	claims := JWTClaims{
-		UserID: userID,
-		Email:  email,
+		UserID:   userID,
+		Email:    email,
+		SchoolID: schoolID,
+		UserType: userType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -75,4 +79,18 @@ func GetUserIDFromToken(ctx *fiber.Ctx) (int64, error) {
 	}
 
 	return 0, errors.New("user ID not found in context")
+}
+
+// GetSchoolIDFromToken extracts school ID from JWT token in Fiber context
+func GetSchoolIDFromToken(ctx *fiber.Ctx) (int64, error) {
+	if schoolID := ctx.Locals("school_id"); schoolID != nil {
+		if id, ok := schoolID.(int64); ok {
+			return id, nil
+		}
+		if id, ok := schoolID.(float64); ok {
+			return int64(id), nil
+		}
+	}
+
+	return 0, errors.New("school ID not found in context")
 }

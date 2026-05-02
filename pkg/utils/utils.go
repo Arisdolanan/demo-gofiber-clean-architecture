@@ -244,3 +244,12 @@ func ValidatorErrors(err error) []response.JSONError {
 
 	return errors
 }
+// StringPtr returns a pointer to the passed string
+func StringPtr(s string) *string {
+	return &s
+}
+
+// Int64Ptr returns a pointer to the passed int64
+func Int64Ptr(i int64) *int64 {
+	return &i
+}

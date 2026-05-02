@@ -2,12 +2,25 @@ package utils
 
 import (
 	"fmt"
+	"math/rand"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+// GenerateRandomPassword generates a random password of a given length
+func GenerateRandomPassword(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
 
 // HashPassword hashes a password using bcrypt
 func HashPassword(password string) (string, error) {

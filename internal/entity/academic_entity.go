@@ -36,6 +36,7 @@ type Subject struct {
 
 type Section struct {
 	ID                int64   `json:"id" db:"id"`
+	SchoolID          int64   `json:"school_id" db:"school_id"`
 	ClassID           int64   `json:"class_id" db:"class_id"`
 	AcademicSessionID int64   `json:"academic_session_id" db:"academic_session_id"`
 	Name              *string `json:"name,omitempty" db:"name" validate:"required"`

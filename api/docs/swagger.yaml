@@ -15,6 +15,75 @@ definitions:
     - template_data
     - template_name
     type: object
+  entity.AcademicSession:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      end_date:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      school_id:
+        type: integer
+      start_date:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - end_date
+    - name
+    - start_date
+    type: object
+  entity.AppPackage:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      max_students:
+        type: integer
+      max_teachers:
+        type: integer
+      name:
+        type: string
+      price_monthly:
+        type: number
+      price_yearly:
+        type: number
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - code
+    - name
+    type: object
   entity.AuthToken:
     properties:
       access_token:
@@ -23,6 +92,138 @@ definitions:
         type: string
       refresh_token:
         type: string
+      user:
+        $ref: '#/definitions/entity.UserResponse'
+    type: object
+  entity.BackupRecord:
+    properties:
+      created_at:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      school_id:
+        type: integer
+      size_bytes:
+        type: integer
+      status:
+        type: string
+      storage_path:
+        type: string
+    type: object
+  entity.Class:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      description:
+        type: string
+      grade_number:
+        type: integer
+      id:
+        type: integer
+      level:
+        $ref: '#/definitions/entity.SchoolLevel'
+      name:
+        type: string
+      school_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - grade_number
+    - level
+    - name
+    type: object
+  entity.DateOnly:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  entity.EmailVerificationRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  entity.Exam:
+    properties:
+      academic_session_id:
+        type: integer
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      description:
+        type: string
+      duration_minutes:
+        type: integer
+      exam_date:
+        type: string
+      exam_type:
+        description: daily, midterm, final, practice
+        type: string
+      id:
+        type: integer
+      max_score:
+        type: integer
+      section_id:
+        type: integer
+      subject_id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - title
+    type: object
+  entity.ExamMark:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      entered_at:
+        type: string
+      entered_by:
+        description: Teacher ID
+        type: integer
+      exam_id:
+        type: integer
+      id:
+        type: integer
+      notes:
+        type: string
+      score:
+        type: number
+      student_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
     type: object
   entity.ExcelData:
     properties:
@@ -69,8 +270,12 @@ definitions:
         type: string
       created_at:
         type: string
+      created_by:
+        type: integer
       deleted_at:
         type: string
+      deleted_by:
+        type: integer
       description:
         maxLength: 1000
         type: string
@@ -94,11 +299,15 @@ definitions:
         maxLength: 500
         minLength: 1
         type: string
+      school_id:
+        type: integer
       size:
         minimum: 1
         type: integer
       updated_at:
         type: string
+      updated_by:
+        type: integer
       user_id:
         type: integer
     required:
@@ -134,6 +343,16 @@ definitions:
       is_public:
         type: boolean
     type: object
+  entity.LicenseStatus:
+    enum:
+    - active
+    - expired
+    - suspended
+    type: string
+    x-enum-varnames:
+    - LicenseActive
+    - LicenseExpired
+    - LicenseSuspended
   entity.LoginRequest:
     properties:
       email:
@@ -170,6 +389,56 @@ definitions:
       url:
         type: string
     type: object
+  entity.Parent:
+    properties:
+      address:
+        type: string
+      children:
+        items:
+          $ref: '#/definitions/entity.ParentChild'
+        type: array
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      occupation:
+        type: string
+      phone:
+        type: string
+      school_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - full_name
+    type: object
+  entity.ParentChild:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      is_primary:
+        type: boolean
+      relationship:
+        type: string
+      student_number:
+        type: string
+    type: object
   entity.PasswordResetConfirmRequest:
     properties:
       new_password:
@@ -188,6 +457,48 @@ definitions:
     required:
     - email
     type: object
+  entity.Permission:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      module_name:
+        type: string
+      permission_code:
+        type: string
+      permission_name:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - module_name
+    - permission_code
+    - permission_name
+    type: object
+  entity.PermissionResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      module_name:
+        type: string
+      permission_code:
+        type: string
+      permission_name:
+        type: string
+    type: object
   entity.RefreshTokenRequest:
     properties:
       refresh_token:
@@ -202,9 +513,16 @@ definitions:
       password:
         minLength: 8
         type: string
+      school_id:
+        items:
+          type: number
+        type: array
+      user_type:
+        $ref: '#/definitions/entity.UserType'
     required:
     - email
     - password
+    - user_type
     type: object
   entity.ResendVerificationRequest:
     properties:
@@ -213,12 +531,736 @@ definitions:
     required:
     - email
     type: object
-  entity.User:
+  entity.RestoreRequest:
     properties:
+      filename:
+        type: string
+    required:
+    - filename
+    type: object
+  entity.Role:
+    properties:
+      code:
+        type: string
       created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      is_system_role:
+        type: boolean
+      name:
+        type: string
+      school_id:
+        description: NULL for system roles
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - code
+    - name
+    type: object
+  entity.RoleResponse:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_system_role:
+        type: boolean
+      name:
+        type: string
+    type: object
+  entity.Schedule:
+    properties:
+      academic_session_id:
+        type: integer
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      day_of_week:
+        description: 0=Sunday, 1=Monday, etc.
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      end_time:
+        type: string
+      id:
+        type: integer
+      room_number:
+        type: string
+      section_id:
+        type: integer
+      start_time:
+        type: string
+      subject_id:
+        type: integer
+      teacher_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.School:
+    properties:
+      accreditation:
+        type: string
+      address:
+        type: string
+      city:
+        type: string
+      code:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      logo:
+        type: string
+      name:
+        type: string
+      npsn:
+        type: string
+      phone:
+        type: string
+      principal_name:
+        type: string
+      province:
+        type: string
+      school_level:
+        $ref: '#/definitions/entity.SchoolLevel'
+      status:
+        $ref: '#/definitions/entity.SchoolStatus'
+      subscription_end_date:
+        type: string
+      subscription_start_date:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - code
+    - name
+    type: object
+  entity.SchoolLevel:
+    enum:
+    - SD
+    - SMP
+    - SMA
+    type: string
+    x-enum-varnames:
+    - LevelSD
+    - LevelSMP
+    - LevelSMA
+  entity.SchoolLicense:
+    properties:
+      app_package_id:
+        type: integer
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      end_date:
+        type: string
+      id:
+        type: integer
+      license_key:
+        type: string
+      school_id:
+        type: integer
+      start_date:
+        type: string
+      status:
+        $ref: '#/definitions/entity.LicenseStatus'
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.SchoolResponse:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/entity.SchoolStatus'
+    type: object
+  entity.SchoolStatus:
+    enum:
+    - active
+    - inactive
+    - suspended
+    type: string
+    x-enum-varnames:
+    - SchoolActive
+    - SchoolInactive
+    - SchoolSuspended
+  entity.Section:
+    properties:
+      academic_session_id:
+        type: integer
+      capacity:
+        type: integer
+      class_id:
+        type: integer
+      code:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      room_number:
+        type: string
+      teacher_id:
+        description: Homeroom teacher
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - name
+    type: object
+  entity.SectionAttendanceRequest:
+    properties:
+      academic_session_id:
+        type: integer
+      attendance_date:
+        $ref: '#/definitions/entity.DateOnly'
+      attendances:
+        items:
+          $ref: '#/definitions/entity.StudentAttendanceEntry'
+        type: array
+      ip_address:
+        type: string
+      marked_by:
+        description: Teacher ID
+        type: integer
+      section_id:
+        type: integer
+      subject_id:
+        description: 'REQUIRED: must be filled by teacher before saving'
+        type: integer
+      user_agent:
+        type: string
+    type: object
+  entity.SettingItem:
+    properties:
+      description:
+        type: string
+      group_name:
+        type: string
+      school_id:
+        type: integer
+      setting_key:
+        type: string
+      setting_value:
+        type: string
+    required:
+    - group_name
+    - setting_key
+    type: object
+  entity.SettingResponse:
+    properties:
+      description:
+        type: string
+      group_name:
+        type: string
+      id:
+        type: integer
+      school_id:
+        type: integer
+      setting_key:
+        type: string
+      setting_value:
+        type: string
+    type: object
+  entity.SettingUpdateRequest:
+    properties:
+      settings:
+        items:
+          $ref: '#/definitions/entity.SettingItem'
+        minItems: 1
+        type: array
+    required:
+    - settings
+    type: object
+  entity.Staff:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      date_of_birth:
         type: string
       deleted_at:
         type: string
+      deleted_by:
+        type: integer
+      department:
+        type: string
+      email:
+        type: string
+      employee_number:
+        type: string
+      full_name:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      join_date:
+        type: string
+      phone:
+        type: string
+      position:
+        type: string
+      school_id:
+        type: integer
+      status:
+        $ref: '#/definitions/entity.StaffStatus'
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - employee_number
+    - full_name
+    type: object
+  entity.StaffAttendance:
+    properties:
+      attendance_date:
+        $ref: '#/definitions/entity.DateOnly'
+      check_in_device:
+        type: string
+      check_in_ip_address:
+        type: string
+      check_in_location:
+        type: string
+      check_in_time:
+        $ref: '#/definitions/entity.TimeOnly'
+      check_out_device:
+        type: string
+      check_out_ip_address:
+        type: string
+      check_out_location:
+        type: string
+      check_out_time:
+        $ref: '#/definitions/entity.TimeOnly'
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      employee_id:
+        type: integer
+      id:
+        type: integer
+      notes:
+        type: string
+      status:
+        description: present, absent, late, sick, permission
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.StaffStatus:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - StaffActive
+    - StaffInactive
+  entity.Student:
+    properties:
+      address:
+        type: string
+      admission_date:
+        type: string
+      blood_type:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      date_of_birth:
+        type: string
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      email:
+        type: string
+      full_name:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      nis:
+        type: string
+      nisn:
+        type: string
+      phone:
+        type: string
+      school_id:
+        type: integer
+      status:
+        $ref: '#/definitions/entity.StudentStatus'
+      student_number:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - full_name
+    - student_number
+    type: object
+  entity.StudentAttendance:
+    properties:
+      academic_session_id:
+        type: integer
+      attendance_date:
+        $ref: '#/definitions/entity.DateOnly'
+      check_in_device:
+        type: string
+      check_in_ip_address:
+        type: string
+      check_in_location:
+        type: string
+      check_in_time:
+        $ref: '#/definitions/entity.TimeOnly'
+      check_out_device:
+        type: string
+      check_out_ip_address:
+        type: string
+      check_out_location:
+        type: string
+      check_out_time:
+        $ref: '#/definitions/entity.TimeOnly'
+      class_name:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      id:
+        type: integer
+      marked_by:
+        description: Teacher ID
+        type: integer
+      notes:
+        type: string
+      section_id:
+        type: integer
+      section_name:
+        type: string
+      status:
+        description: present, absent, late, sick, permission
+        type: string
+      student_id:
+        type: integer
+      student_name:
+        description: Display fields (populated via JOIN)
+        type: string
+      student_number:
+        type: string
+      subject_id:
+        type: integer
+      subject_name:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.StudentAttendanceEntry:
+    properties:
+      notes:
+        type: string
+      status:
+        description: present, absent, late, sick, permission
+        type: string
+      student_id:
+        type: integer
+    type: object
+  entity.StudentParent:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      id:
+        type: integer
+      is_primary:
+        type: boolean
+      parent_id:
+        type: integer
+      relationship:
+        description: father, mother, guardian
+        type: string
+      student_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.StudentSection:
+    properties:
+      academic_session_id:
+        type: integer
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      enrollment_date:
+        type: string
+      id:
+        type: integer
+      roll_number:
+        type: string
+      section_id:
+        type: integer
+      status:
+        description: active, promoted, transferred
+        type: string
+      student_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.StudentStatus:
+    enum:
+    - active
+    - inactive
+    - graduated
+    - transferred
+    type: string
+    x-enum-varnames:
+    - StudentActive
+    - StudentInactive
+    - StudentGraduated
+    - StudentTransferred
+  entity.Subject:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      credit_hours:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      school_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - name
+    type: object
+  entity.SwitchSchoolRequest:
+    properties:
+      school_id:
+        type: integer
+    required:
+    - school_id
+    type: object
+  entity.Teacher:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      date_of_birth:
+        type: string
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      email:
+        type: string
+      employee_number:
+        type: string
+      full_name:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      join_date:
+        type: string
+      phone:
+        type: string
+      qualification:
+        type: string
+      school_id:
+        type: integer
+      specialization:
+        type: string
+      status:
+        $ref: '#/definitions/entity.TeacherStatus'
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - employee_number
+    - full_name
+    type: object
+  entity.TeacherAttendance:
+    properties:
+      attendance_date:
+        $ref: '#/definitions/entity.DateOnly'
+      check_in_device:
+        type: string
+      check_in_ip_address:
+        type: string
+      check_in_location:
+        type: string
+      check_in_time:
+        $ref: '#/definitions/entity.TimeOnly'
+      check_out_device:
+        type: string
+      check_out_ip_address:
+        type: string
+      check_out_location:
+        type: string
+      check_out_time:
+        $ref: '#/definitions/entity.TimeOnly'
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
+      id:
+        type: integer
+      notes:
+        type: string
+      status:
+        description: present, absent, late, sick, permission
+        type: string
+      teacher_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  entity.TeacherStatus:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - TeacherActive
+    - TeacherInactive
+  entity.TimeOnly:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  entity.User:
+    properties:
+      accessible_schools:
+        items:
+          $ref: '#/definitions/entity.School'
+        type: array
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      deleted_at:
+        type: string
+      deleted_by:
+        type: integer
       email:
         type: string
       email_verification_expires_at:
@@ -229,14 +1271,36 @@ definitions:
         type: string
       id:
         type: integer
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
       password:
         type: string
       password_reset_expires_at:
         type: string
       password_reset_token:
         type: string
+      permissions:
+        items:
+          $ref: '#/definitions/entity.Permission'
+        type: array
+      role:
+        allOf:
+        - $ref: '#/definitions/entity.Role'
+        description: Relationships
+      school:
+        $ref: '#/definitions/entity.School'
+      school_id:
+        items:
+          type: number
+        type: array
       updated_at:
         type: string
+      updated_by:
+        type: integer
+      user_type:
+        $ref: '#/definitions/entity.UserType'
       username:
         type: string
     type: object
@@ -255,6 +1319,55 @@ definitions:
           $ref: '#/definitions/entity.User'
         type: array
     type: object
+  entity.UserResponse:
+    properties:
+      accessible_schools:
+        items:
+          $ref: '#/definitions/entity.SchoolResponse'
+        type: array
+      created_at:
+        type: string
+      email:
+        type: string
+      email_verified_at:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/entity.PermissionResponse'
+        type: array
+      role:
+        $ref: '#/definitions/entity.RoleResponse'
+      school:
+        $ref: '#/definitions/entity.SchoolResponse'
+      updated_at:
+        type: string
+      user_type:
+        $ref: '#/definitions/entity.UserType'
+      username:
+        type: string
+    type: object
+  entity.UserType:
+    enum:
+    - super_admin
+    - admin
+    - teacher
+    - student
+    - parent
+    - staff
+    type: string
+    x-enum-varnames:
+    - UserSuperAdmin
+    - UserAdmin
+    - UserTeacher
+    - UserStudent
+    - UserParent
+    - UserStaff
   pdfs.TemplateData:
     additionalProperties: true
     type: object
@@ -297,6 +1410,330 @@ info:
   title: Fiber Swagger Example API
   version: "1.0"
 paths:
+  /api/v1/academic/classes:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get classes
+      tags:
+      - academic
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Class details
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Class'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create school class
+      tags:
+      - academic
+  /api/v1/academic/classes/{id}:
+    delete:
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Delete school class
+      tags:
+      - academic
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Class details
+        in: body
+        name: class
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Class'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update school class
+      tags:
+      - academic
+  /api/v1/academic/sections:
+    get:
+      parameters:
+      - description: Class ID
+        in: query
+        name: class_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get sections by class
+      tags:
+      - academic
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Section details
+        in: body
+        name: section
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Section'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create class section
+      tags:
+      - academic
+  /api/v1/academic/sections/{id}:
+    delete:
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Delete class section
+      tags:
+      - academic
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Section details
+        in: body
+        name: section
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Section'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update class section
+      tags:
+      - academic
+  /api/v1/academic/sessions:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get sessions
+      tags:
+      - academic
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Session details
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/entity.AcademicSession'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create academic session
+      tags:
+      - academic
+  /api/v1/academic/sessions/{id}:
+    delete:
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Delete academic session
+      tags:
+      - academic
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Session details
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/entity.AcademicSession'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update academic session
+      tags:
+      - academic
+  /api/v1/academic/sessions/active:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get active session
+      tags:
+      - academic
+  /api/v1/academic/subjects:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get subjects
+      tags:
+      - academic
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subject details
+        in: body
+        name: subject
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Subject'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create school subject
+      tags:
+      - academic
+  /api/v1/academic/subjects/{id}:
+    delete:
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Delete school subject
+      tags:
+      - academic
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Subject details
+        in: body
+        name: subject
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Subject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update school subject
+      tags:
+      - academic
   /api/v1/admin/cleanup-tokens:
     post:
       consumes:
@@ -533,6 +1970,47 @@ paths:
       summary: Reset password
       tags:
       - auth
+  /api/v1/auth/switch-school:
+    post:
+      consumes:
+      - application/json
+      description: Switch the active school context and get a new token
+      parameters:
+      - description: Target school ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.SwitchSchoolRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: School switched successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.AuthToken'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Switch active school
+      tags:
+      - auth
   /api/v1/auth/verify:
     get:
       consumes:
@@ -560,16 +2038,17 @@ paths:
       tags:
       - auth
   /api/v1/auth/verify-email:
-    get:
+    post:
       consumes:
       - application/json
       description: Verify user's email address using verification token
       parameters:
       - description: Verification token
-        in: query
-        name: token
+        in: body
+        name: request
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/entity.EmailVerificationRequest'
       produces:
       - application/json
       responses:
@@ -588,6 +2067,86 @@ paths:
       summary: Verify user email
       tags:
       - auth
+  /api/v1/backup/list:
+    get:
+      consumes:
+      - application/json
+      description: List all available database backup files
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backups retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.BackupRecord'
+                  type: array
+              type: object
+        "500":
+          description: Failed to retrieve backups
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: List backups
+      tags:
+      - backup
+  /api/v1/backup/manual:
+    post:
+      consumes:
+      - application/json
+      description: Trigger a manual database backup
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backup created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.BackupRecord'
+              type: object
+        "500":
+          description: Failed to create backup
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Create backup
+      tags:
+      - backup
+  /api/v1/backup/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restore database from a specified backup file
+      parameters:
+      - description: Restore request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RestoreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database restored successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Failed to restore backup
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Restore backup
+      tags:
+      - backup
   /api/v1/excel/export:
     post:
       consumes:
@@ -931,6 +2490,578 @@ paths:
       summary: Upload a file
       tags:
       - files
+  /api/v1/operations/attendance:
+    get:
+      parameters:
+      - description: Section ID
+        in: query
+        name: section_id
+        type: integer
+      - description: Date (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get filtered attendance report
+      tags:
+      - operations
+  /api/v1/operations/attendance/section:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Section attendance with required subject_id
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/entity.SectionAttendanceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Record attendance for all students in a section
+      tags:
+      - operations
+  /api/v1/operations/attendance/section/{section_id}/students:
+    get:
+      parameters:
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: integer
+      - description: Academic Session ID
+        in: query
+        name: academic_session_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get students in a section for attendance
+      tags:
+      - operations
+  /api/v1/operations/attendance/staff:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attendance details
+        in: body
+        name: attendance
+        required: true
+        schema:
+          $ref: '#/definitions/entity.StaffAttendance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Record staff attendance
+      tags:
+      - operations
+  /api/v1/operations/attendance/staff/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Attendance details
+        in: body
+        name: attendance
+        required: true
+        schema:
+          $ref: '#/definitions/entity.StaffAttendance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update staff attendance
+      tags:
+      - operations
+  /api/v1/operations/attendance/student:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attendance details
+        in: body
+        name: attendance
+        required: true
+        schema:
+          $ref: '#/definitions/entity.StudentAttendance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Record student attendance
+      tags:
+      - operations
+  /api/v1/operations/attendance/student/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Attendance details
+        in: body
+        name: attendance
+        required: true
+        schema:
+          $ref: '#/definitions/entity.StudentAttendance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update student attendance
+      tags:
+      - operations
+  /api/v1/operations/attendance/teacher:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attendance details
+        in: body
+        name: attendance
+        required: true
+        schema:
+          $ref: '#/definitions/entity.TeacherAttendance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Record teacher attendance
+      tags:
+      - operations
+  /api/v1/operations/attendance/teacher/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Attendance details
+        in: body
+        name: attendance
+        required: true
+        schema:
+          $ref: '#/definitions/entity.TeacherAttendance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update teacher attendance
+      tags:
+      - operations
+  /api/v1/operations/exams:
+    get:
+      parameters:
+      - description: Section ID
+        in: query
+        name: section_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: List all exams
+      tags:
+      - operations
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Exam details
+        in: body
+        name: exam
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Exam'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create a new exam
+      tags:
+      - operations
+  /api/v1/operations/exams/{exam_id}/marks:
+    get:
+      parameters:
+      - description: Exam ID
+        in: path
+        name: exam_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get marks by Exam
+      tags:
+      - operations
+  /api/v1/operations/exams/{id}:
+    delete:
+      parameters:
+      - description: Exam ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Delete an exam
+      tags:
+      - operations
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Exam ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Exam details
+        in: body
+        name: exam
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Exam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update exam details
+      tags:
+      - operations
+  /api/v1/operations/marks:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Mark details
+        in: body
+        name: mark
+        required: true
+        schema:
+          $ref: '#/definitions/entity.ExamMark'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update student exam mark
+      tags:
+      - operations
+  /api/v1/operations/notifications:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get user notifications
+      tags:
+      - operations
+  /api/v1/operations/report-card:
+    get:
+      consumes:
+      - application/json
+      description: Get consolidated report card for a student in a specific session
+      parameters:
+      - description: Student ID
+        in: query
+        name: student_id
+        required: true
+        type: integer
+      - description: Session ID
+        in: query
+        name: session_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Get student report card
+      tags:
+      - operations
+  /api/v1/operations/report-card/section:
+    get:
+      consumes:
+      - application/json
+      description: Get report cards for all students in a section for a specific session
+      parameters:
+      - description: Section ID
+        in: query
+        name: section_id
+        required: true
+        type: integer
+      - description: Session ID
+        in: query
+        name: session_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Get section report cards
+      tags:
+      - operations
+  /api/v1/operations/schedules:
+    get:
+      parameters:
+      - description: Section ID
+        in: query
+        name: section_id
+        type: integer
+      - description: Teacher ID
+        in: query
+        name: teacher_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: List all schedules
+      tags:
+      - operations
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Schedule details
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Schedule'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create class schedule
+      tags:
+      - operations
+  /api/v1/operations/schedules/{id}:
+    delete:
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Delete class schedule
+      tags:
+      - operations
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Schedule details
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Schedule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update class schedule
+      tags:
+      - operations
+  /api/v1/operations/staff/{employee_id}/attendance:
+    get:
+      parameters:
+      - description: Employee ID
+        in: path
+        name: employee_id
+        required: true
+        type: integer
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get staff attendance history
+      tags:
+      - operations
+  /api/v1/operations/students/{student_id}/attendance:
+    get:
+      parameters:
+      - description: Student ID
+        in: path
+        name: student_id
+        required: true
+        type: integer
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get student attendance history
+      tags:
+      - operations
+  /api/v1/operations/students/{student_id}/marks:
+    get:
+      parameters:
+      - description: Student ID
+        in: path
+        name: student_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get marks by Student
+      tags:
+      - operations
+  /api/v1/operations/teachers/{teacher_id}/attendance:
+    get:
+      parameters:
+      - description: Teacher ID
+        in: path
+        name: teacher_id
+        required: true
+        type: integer
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get teacher attendance history
+      tags:
+      - operations
   /api/v1/pdf/generate:
     post:
       consumes:
@@ -1005,6 +3136,800 @@ paths:
       summary: Generate PDF from template
       tags:
       - pdf
+  /api/v1/people/enroll:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Enrollment details
+        in: body
+        name: enrollment
+        required: true
+        schema:
+          $ref: '#/definitions/entity.StudentSection'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Enroll student in section
+      tags:
+      - people
+  /api/v1/people/parents:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get parents
+      tags:
+      - people
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Parent details
+        in: body
+        name: parent
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Parent'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create parent
+      tags:
+      - people
+  /api/v1/people/parents/{id}:
+    delete:
+      parameters:
+      - description: Parent ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Delete parent
+      tags:
+      - people
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Parent ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Parent details
+        in: body
+        name: parent
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Parent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Update parent
+      tags:
+      - people
+  /api/v1/people/parents/link:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Link details
+        in: body
+        name: link
+        required: true
+        schema:
+          $ref: '#/definitions/entity.StudentParent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Link parent to student
+      tags:
+      - people
+  /api/v1/people/sections/{section_id}/students:
+    get:
+      parameters:
+      - description: Section ID
+        in: path
+        name: section_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get students by Section
+      tags:
+      - people
+  /api/v1/people/staff:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get staff
+      tags:
+      - people
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Staff details
+        in: body
+        name: staff
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Staff'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Create school staff
+      tags:
+      - people
+  /api/v1/people/staff/{id}:
+    delete:
+      parameters:
+      - description: Staff ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Delete school staff
+      tags:
+      - people
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Staff ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Staff details
+        in: body
+        name: staff
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Staff'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Update school staff
+      tags:
+      - people
+  /api/v1/people/staff/users/{user_id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get staff by User ID
+      tags:
+      - people
+  /api/v1/people/students:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Student details
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Student'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create school student
+      tags:
+      - people
+  /api/v1/people/students/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Student details
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Student'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Update school student
+      tags:
+      - people
+  /api/v1/people/students/{student_id}/sections:
+    get:
+      parameters:
+      - description: Student ID
+        in: path
+        name: student_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get student sections
+      tags:
+      - people
+  /api/v1/people/students/list:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: List all students
+      tags:
+      - people
+  /api/v1/people/students/users/{user_id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get student by User ID
+      tags:
+      - people
+  /api/v1/people/teachers:
+    get:
+      parameters:
+      - description: School ID
+        in: query
+        name: school_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get teachers
+      tags:
+      - people
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Teacher details
+        in: body
+        name: teacher
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Teacher'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Create school teacher
+      tags:
+      - people
+  /api/v1/people/teachers/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Teacher ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Teacher details
+        in: body
+        name: teacher
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Teacher'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Update school teacher
+      tags:
+      - people
+  /api/v1/people/teachers/users/{user_id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get teacher by User ID
+      tags:
+      - people
+  /api/v1/rbac/permissions:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Permission'
+                  type: array
+              type: object
+      summary: Get permissions
+      tags:
+      - rbac
+  /api/v1/rbac/roles:
+    get:
+      parameters:
+      - description: School ID (optional)
+        in: query
+        name: school_id
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Role'
+                  type: array
+              type: object
+      summary: Get roles
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role details
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Role'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create a new role
+      tags:
+      - rbac
+  /api/v1/rbac/roles/{id}/permissions:
+    get:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Permission'
+                  type: array
+              type: object
+      summary: Get role permissions
+      tags:
+      - rbac
+    post:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Permission ID
+        in: query
+        name: permission_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Assign permission to role
+      tags:
+      - rbac
+  /api/v1/rbac/users/{user_id}/roles:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Get user roles
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Role ID
+        in: body
+        name: role_id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Assign role to user
+      tags:
+      - rbac
+  /api/v1/schools:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.School'
+                  type: array
+              type: object
+      summary: List all schools
+      tags:
+      - schools
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: School information
+        in: body
+        name: school
+        required: true
+        schema:
+          $ref: '#/definitions/entity.School'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.School'
+              type: object
+      summary: Register a new school
+      tags:
+      - schools
+  /api/v1/schools/{id}:
+    get:
+      parameters:
+      - description: School ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.School'
+              type: object
+      summary: Get school by ID
+      tags:
+      - schools
+    put:
+      parameters:
+      - description: School ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: School information
+        in: body
+        name: school
+        required: true
+        schema:
+          $ref: '#/definitions/entity.School'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.School'
+              type: object
+      summary: Update school details
+      tags:
+      - schools
+  /api/v1/schools/{id}/license:
+    post:
+      parameters:
+      - description: School ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Package Code
+        in: query
+        name: package_code
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.SchoolLicense'
+              type: object
+      summary: Assign license to school
+      tags:
+      - schools
+  /api/v1/schools/packages:
+    post:
+      parameters:
+      - description: Package details
+        in: body
+        name: package
+        required: true
+        schema:
+          $ref: '#/definitions/entity.AppPackage'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+      summary: Create application package
+      tags:
+      - schools
+  /api/v1/settings:
+    get:
+      consumes:
+      - application/json
+      description: Get settings, optionally filtered by group_name
+      parameters:
+      - description: Group Name (e.g. umum, backup, integrasi)
+        in: query
+        name: group
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Settings retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.SettingResponse'
+                  type: array
+              type: object
+        "500":
+          description: Failed to retrieve settings
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Get settings
+      tags:
+      - settings
+    put:
+      consumes:
+      - application/json
+      description: Update or insert multiple settings
+      parameters:
+      - description: Settings update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.SettingUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Settings updated successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Failed to update settings
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Update settings
+      tags:
+      - settings
   /api/v1/users:
     get:
       consumes:
@@ -1085,6 +4010,38 @@ paths:
       tags:
       - users
   /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Failed to delete user
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Delete user
+      tags:
+      - users
     get:
       consumes:
       - application/json
@@ -1116,6 +4073,82 @@ paths:
           schema:
             $ref: '#/definitions/response.HTTPErrorResponse'
       summary: Get user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user with the provided information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entity.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.User'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Failed to update user
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Update user
+      tags:
+      - users
+  /api/v1/users/{id}/soft-delete:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete a user (mark as deleted without removing from database)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User soft deleted successfully
+          schema:
+            $ref: '#/definitions/response.HTTPSuccessResponse'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+        "500":
+          description: Failed to soft delete user
+          schema:
+            $ref: '#/definitions/response.HTTPErrorResponse'
+      summary: Soft delete user
       tags:
       - users
 securityDefinitions:

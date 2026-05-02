@@ -4,6 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT REFERENCES schools(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL,
     token_hash VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,

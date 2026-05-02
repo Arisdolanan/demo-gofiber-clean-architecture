@@ -80,21 +80,37 @@ func (r *BaseRepository[T]) Update(ctx context.Context, entity *T, whereClause s
 	delete(values, "created_by")
 
 	// Remove zero values to allow partial updates and avoid overwriting with defaults
+	// But be careful: we want to keep non-nil pointers even if they point to empty strings
 	for k, v := range values {
-		if reflect.ValueOf(v).IsZero() {
+		rv := reflect.ValueOf(v)
+		if !rv.IsValid() {
+			delete(values, k)
+			continue
+		}
+		
+		// If it's a pointer, only delete if it's nil
+		if rv.Kind() == reflect.Ptr {
+			if rv.IsNil() {
+				delete(values, k)
+			}
+			continue
+		}
+
+		// For other types, use IsZero
+		if rv.IsZero() {
 			delete(values, k)
 		}
 	}
 
 	// Handle audit fields for entities that have them
-	if _, hasUpdatedAt := values["updated_at"]; hasUpdatedAt {
+	if _, ok := r.getEntityFieldPtr(entity, "UpdatedAt"); ok {
 		values["updated_at"] = time.Now()
 	}
 
 	// Handle audit trail fields if context contains user ID
 	if userID := ctx.Value("user_id"); userID != nil {
 		if userIDVal, ok := userID.(int64); ok {
-			if _, hasUpdatedBy := values["updated_by"]; hasUpdatedBy {
+			if _, ok := r.getEntityFieldPtr(entity, "UpdatedBy"); ok {
 				values["updated_by"] = &userIDVal
 			}
 		}
@@ -166,7 +182,7 @@ func (r *BaseRepository[T]) FindOne(ctx context.Context, whereClause string, arg
 
 // FindAll retrieves all entities matching the where clause
 func (r *BaseRepository[T]) FindAll(ctx context.Context, whereClause string, args ...any) ([]*T, error) {
-	var entities []*T
+	entities := make([]*T, 0)
 	query := r.postgres.Table(r.table)
 
 	if whereClause != "" {
@@ -183,7 +199,7 @@ func (r *BaseRepository[T]) FindAll(ctx context.Context, whereClause string, arg
 
 // FindAllWithPagination retrieves entities with pagination
 func (r *BaseRepository[T]) FindAllWithPagination(ctx context.Context, limit, offset int, whereClause string, args ...any) ([]*T, error) {
-	var entities []*T
+	entities := make([]*T, 0)
 	query := r.postgres.Table(r.table)
 
 	if whereClause != "" {

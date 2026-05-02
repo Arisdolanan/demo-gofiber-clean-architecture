@@ -37,9 +37,30 @@ type AuthUsecaseTestSuite struct {
 	authUsecase      AuthUsecase
 	mockAuthRepo     *mocks.MockAuthRepository
 	mockRedis        *mocks.MockAuthRedisRepository
-	mockEmailUsecase *MockEmailUsecase
-	validator        *validator.Validate
-	logger           *logrus.Logger
+	mockEmailUsecase       *MockEmailUsecase
+	mockActivityLogUsecase *MockActivityLogUsecase
+	validator              *validator.Validate
+	logger                 *logrus.Logger
+}
+
+// MockActivityLogUsecase for testing
+type MockActivityLogUsecase struct {
+	mock.Mock
+}
+
+func (m *MockActivityLogUsecase) GetActivities(ctx context.Context, schoolID *int64, page, pageSize int) ([]*entity.ActivityLog, error) {
+	args := m.Called(ctx, schoolID, page, pageSize)
+	return args.Get(0).([]*entity.ActivityLog), args.Error(1)
+}
+
+func (m *MockActivityLogUsecase) GetDeletions(ctx context.Context, schoolID *int64, page, pageSize int) ([]*entity.ActivityLog, error) {
+	args := m.Called(ctx, schoolID, page, pageSize)
+	return args.Get(0).([]*entity.ActivityLog), args.Error(1)
+}
+
+func (m *MockActivityLogUsecase) LogActivity(ctx context.Context, log *entity.ActivityLog) error {
+	args := m.Called(ctx, log)
+	return args.Error(0)
 }
 
 // MockEmailUsecase for testing
@@ -81,6 +102,7 @@ func (suite *AuthUsecaseTestSuite) SetupTest() {
 	suite.mockAuthRepo = new(mocks.MockAuthRepository)
 	suite.mockRedis = new(mocks.MockAuthRedisRepository)
 	suite.mockEmailUsecase = new(MockEmailUsecase)
+	suite.mockActivityLogUsecase = new(MockActivityLogUsecase)
 	suite.validator = validator.New()
 	suite.logger = logrus.New()
 	suite.logger.SetLevel(logrus.ErrorLevel) // Suppress logs in tests
@@ -96,6 +118,7 @@ func (suite *AuthUsecaseTestSuite) SetupTest() {
 		suite.logger,
 		"test-secret-key",
 		mockKafkaProducer,
+		suite.mockActivityLogUsecase,
 	)
 }
 
@@ -113,9 +136,10 @@ func (suite *AuthUsecaseTestSuite) TestRegister_Success() {
 	suite.mockAuthRepo.On("FindByEmail", email).Return(nil, nil)
 	suite.mockAuthRepo.On("Register", mock.AnythingOfType("*entity.User")).Return(nil)
 	suite.mockEmailUsecase.On("SendVerificationEmail", mock.AnythingOfType("int64"), email).Return(nil)
+	suite.mockActivityLogUsecase.On("LogActivity", mock.Anything, mock.AnythingOfType("*entity.ActivityLog")).Return(nil)
 
 	// Execute
-	err := suite.authUsecase.Register(email, password)
+	err := suite.authUsecase.Register(email, password, nil, entity.UserStudent, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -131,7 +155,7 @@ func (suite *AuthUsecaseTestSuite) TestRegister_UserAlreadyExists() {
 	suite.mockAuthRepo.On("FindByEmail", email).Return(existingUser, nil)
 
 	// Execute
-	err := suite.authUsecase.Register(email, password)
+	err := suite.authUsecase.Register(email, password, nil, entity.UserStudent, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -148,7 +172,7 @@ func (suite *AuthUsecaseTestSuite) TestRegister_DatabaseErrorWhenCheckingUser() 
 	suite.mockAuthRepo.On("FindByEmail", email).Return(nil, dbError)
 
 	// Execute
-	err := suite.authUsecase.Register(email, password)
+	err := suite.authUsecase.Register(email, password, nil, entity.UserStudent, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -166,7 +190,7 @@ func (suite *AuthUsecaseTestSuite) TestRegister_DatabaseErrorWhenRegistering() {
 	suite.mockAuthRepo.On("Register", mock.AnythingOfType("*entity.User")).Return(dbError)
 
 	// Execute
-	err := suite.authUsecase.Register(email, password)
+	err := suite.authUsecase.Register(email, password, nil, entity.UserStudent, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -179,7 +203,7 @@ func (suite *AuthUsecaseTestSuite) TestRegister_PasswordComplexityError() {
 	weakPassword := "123" // Too short and doesn't meet complexity requirements
 
 	// Execute
-	err := suite.authUsecase.Register(email, weakPassword)
+	err := suite.authUsecase.Register(email, weakPassword, nil, entity.UserStudent, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -195,9 +219,10 @@ func (suite *AuthUsecaseTestSuite) TestLogin_Success() {
 	// Mock expectations
 	suite.mockAuthRepo.On("FindByEmail", email).Return(user, nil)
 	suite.mockRedis.On("StoreRefreshToken", user.ID, mock.AnythingOfType("string"), mock.AnythingOfType("time.Duration")).Return(nil)
+	suite.mockActivityLogUsecase.On("LogActivity", mock.Anything, mock.AnythingOfType("*entity.ActivityLog")).Return(nil)
 
 	// Execute
-	authToken, err := suite.authUsecase.Login(email, password)
+	authToken, err := suite.authUsecase.Login(email, password, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -216,7 +241,7 @@ func (suite *AuthUsecaseTestSuite) TestLogin_UserNotFound() {
 	suite.mockAuthRepo.On("FindByEmail", email).Return(nil, nil)
 
 	// Execute
-	authToken, err := suite.authUsecase.Login(email, password)
+	authToken, err := suite.authUsecase.Login(email, password, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -234,7 +259,7 @@ func (suite *AuthUsecaseTestSuite) TestLogin_DatabaseError() {
 	suite.mockAuthRepo.On("FindByEmail", email).Return(nil, dbError)
 
 	// Execute
-	authToken, err := suite.authUsecase.Login(email, password)
+	authToken, err := suite.authUsecase.Login(email, password, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -252,7 +277,7 @@ func (suite *AuthUsecaseTestSuite) TestLogin_InvalidPassword() {
 	suite.mockAuthRepo.On("FindByEmail", email).Return(user, nil)
 
 	// Execute
-	authToken, err := suite.authUsecase.Login(email, password)
+	authToken, err := suite.authUsecase.Login(email, password, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -272,7 +297,7 @@ func (suite *AuthUsecaseTestSuite) TestLogin_RedisError() {
 	suite.mockRedis.On("StoreRefreshToken", user.ID, mock.AnythingOfType("string"), mock.AnythingOfType("time.Duration")).Return(redisError)
 
 	// Execute
-	authToken, err := suite.authUsecase.Login(email, password)
+	authToken, err := suite.authUsecase.Login(email, password, "127.0.0.1", "test-ua")
 
 	// Assert
 	assert.Error(suite.T(), err)

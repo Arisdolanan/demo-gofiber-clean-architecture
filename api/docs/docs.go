@@ -23,6 +23,507 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/academic/classes": {
+            "get": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Get classes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Create school class",
+                "parameters": [
+                    {
+                        "description": "Class details",
+                        "name": "class",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Class"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/classes/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Update school class",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Class details",
+                        "name": "class",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Class"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Delete school class",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/sections": {
+            "get": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Get sections by class",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "class_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Create class section",
+                "parameters": [
+                    {
+                        "description": "Section details",
+                        "name": "section",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Section"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/sections/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Update class section",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Section details",
+                        "name": "section",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Section"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Delete class section",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/sessions": {
+            "get": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Get sessions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Create academic session",
+                "parameters": [
+                    {
+                        "description": "Session details",
+                        "name": "session",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.AcademicSession"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/sessions/active": {
+            "get": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Get active session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/sessions/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Update academic session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Session details",
+                        "name": "session",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.AcademicSession"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Delete academic session",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/subjects": {
+            "get": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Get subjects",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Create school subject",
+                "parameters": [
+                    {
+                        "description": "Subject details",
+                        "name": "subject",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Subject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/academic/subjects/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Update school subject",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Subject details",
+                        "name": "subject",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Subject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "academic"
+                ],
+                "summary": "Delete school subject",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/cleanup-tokens": {
             "post": {
                 "security": [
@@ -397,6 +898,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/auth/switch-school": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Switch the active school context and get a new token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Switch active school",
+                "parameters": [
+                    {
+                        "description": "Target school ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.SwitchSchoolRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "School switched successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.AuthToken"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/verify": {
             "get": {
                 "security": [
@@ -444,7 +1014,7 @@ const docTemplate = `{
             }
         },
         "/api/v1/auth/verify-email": {
-            "get": {
+            "post": {
                 "description": "Verify user's email address using verification token",
                 "consumes": [
                     "application/json"
@@ -458,11 +1028,13 @@ const docTemplate = `{
                 "summary": "Verify user email",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Verification token",
-                        "name": "token",
-                        "in": "query",
-                        "required": true
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.EmailVerificationRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -480,6 +1052,137 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/backup/list": {
+            "get": {
+                "description": "List all available database backup files",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "List backups",
+                "responses": {
+                    "200": {
+                        "description": "Backups retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.BackupRecord"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve backups",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/backup/manual": {
+            "post": {
+                "description": "Trigger a manual database backup",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "Create backup",
+                "responses": {
+                    "200": {
+                        "description": "Backup created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.BackupRecord"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create backup",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/backup/restore": {
+            "post": {
+                "description": "Restore database from a specified backup file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "Restore backup",
+                "parameters": [
+                    {
+                        "description": "Restore request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.RestoreRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Database restored successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to restore backup",
                         "schema": {
                             "$ref": "#/definitions/response.HTTPErrorResponse"
                         }
@@ -1051,6 +1754,891 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/operations/attendance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get filtered attendance report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Date (YYYY-MM-DD)",
+                        "name": "date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/section": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Record attendance for all students in a section",
+                "parameters": [
+                    {
+                        "description": "Section attendance with required subject_id",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.SectionAttendanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/section/{section_id}/students": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get students in a section for attendance",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Academic Session ID",
+                        "name": "academic_session_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/staff": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Record staff attendance",
+                "parameters": [
+                    {
+                        "description": "Attendance details",
+                        "name": "attendance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.StaffAttendance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/staff/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Update staff attendance",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attendance details",
+                        "name": "attendance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.StaffAttendance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/student": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Record student attendance",
+                "parameters": [
+                    {
+                        "description": "Attendance details",
+                        "name": "attendance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.StudentAttendance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/student/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Update student attendance",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attendance details",
+                        "name": "attendance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.StudentAttendance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/teacher": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Record teacher attendance",
+                "parameters": [
+                    {
+                        "description": "Attendance details",
+                        "name": "attendance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TeacherAttendance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/attendance/teacher/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Update teacher attendance",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attendance details",
+                        "name": "attendance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.TeacherAttendance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/exams": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "List all exams",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Create a new exam",
+                "parameters": [
+                    {
+                        "description": "Exam details",
+                        "name": "exam",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Exam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/exams/{exam_id}/marks": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get marks by Exam",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Exam ID",
+                        "name": "exam_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/exams/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Update exam details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Exam ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Exam details",
+                        "name": "exam",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Exam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Delete an exam",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Exam ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/marks": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Update student exam mark",
+                "parameters": [
+                    {
+                        "description": "Mark details",
+                        "name": "mark",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.ExamMark"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/notifications": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get user notifications",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/report-card": {
+            "get": {
+                "description": "Get consolidated report card for a student in a specific session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get student report card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "student_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/report-card/section": {
+            "get": {
+                "description": "Get report cards for all students in a section for a specific session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get section report cards",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/schedules": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "List all schedules",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Teacher ID",
+                        "name": "teacher_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Create class schedule",
+                "parameters": [
+                    {
+                        "description": "Schedule details",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Schedule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/schedules/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Update class schedule",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Schedule details",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Schedule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Delete class schedule",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/staff/{employee_id}/attendance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get staff attendance history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Employee ID",
+                        "name": "employee_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/students/{student_id}/attendance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get student attendance history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/students/{student_id}/marks": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get marks by Student",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/operations/teachers/{teacher_id}/attendance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operations"
+                ],
+                "summary": "Get teacher attendance history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Teacher ID",
+                        "name": "teacher_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/pdf/generate": {
             "post": {
                 "security": [
@@ -1170,6 +2758,1272 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "PDF generation failed",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/enroll": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Enroll student in section",
+                "parameters": [
+                    {
+                        "description": "Enrollment details",
+                        "name": "enrollment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.StudentSection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/parents": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get parents",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Create parent",
+                "parameters": [
+                    {
+                        "description": "Parent details",
+                        "name": "parent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Parent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/parents/link": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Link parent to student",
+                "parameters": [
+                    {
+                        "description": "Link details",
+                        "name": "link",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.StudentParent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/parents/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Update parent",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Parent details",
+                        "name": "parent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Parent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "people"
+                ],
+                "summary": "Delete parent",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/sections/{section_id}/students": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get students by Section",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/staff": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get staff",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Create school staff",
+                "parameters": [
+                    {
+                        "description": "Staff details",
+                        "name": "staff",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Staff"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/staff/users/{user_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get staff by User ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/staff/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Update school staff",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Staff ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Staff details",
+                        "name": "staff",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Staff"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "people"
+                ],
+                "summary": "Delete school staff",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Staff ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/students": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Create school student",
+                "parameters": [
+                    {
+                        "description": "Student details",
+                        "name": "student",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Student"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/students/list": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "List all students",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/students/users/{user_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get student by User ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/students/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Update school student",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Student details",
+                        "name": "student",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Student"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/students/{student_id}/sections": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get student sections",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/teachers": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get teachers",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "school_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Create school teacher",
+                "parameters": [
+                    {
+                        "description": "Teacher details",
+                        "name": "teacher",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Teacher"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/teachers/users/{user_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Get teacher by User ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/people/teachers/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Update school teacher",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Teacher ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Teacher details",
+                        "name": "teacher",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Teacher"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rbac/permissions": {
+            "get": {
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get permissions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Permission"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rbac/roles": {
+            "get": {
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get roles",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID (optional)",
+                        "name": "school_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Role"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Create a new role",
+                "parameters": [
+                    {
+                        "description": "Role details",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Role"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rbac/roles/{id}/permissions": {
+            "get": {
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get role permissions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Permission"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Assign permission to role",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Permission ID",
+                        "name": "permission_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rbac/users/{user_id}/roles": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Get user roles",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "Assign role to user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Role ID",
+                        "name": "role_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/schools": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schools"
+                ],
+                "summary": "List all schools",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.School"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schools"
+                ],
+                "summary": "Register a new school",
+                "parameters": [
+                    {
+                        "description": "School information",
+                        "name": "school",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.School"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.School"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/schools/packages": {
+            "post": {
+                "tags": [
+                    "schools"
+                ],
+                "summary": "Create application package",
+                "parameters": [
+                    {
+                        "description": "Package details",
+                        "name": "package",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.AppPackage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/schools/{id}": {
+            "get": {
+                "tags": [
+                    "schools"
+                ],
+                "summary": "Get school by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.School"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "schools"
+                ],
+                "summary": "Update school details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "School information",
+                        "name": "school",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.School"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.School"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/schools/{id}/license": {
+            "post": {
+                "tags": [
+                    "schools"
+                ],
+                "summary": "Assign license to school",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "School ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Package Code",
+                        "name": "package_code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.SchoolLicense"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/settings": {
+            "get": {
+                "description": "Get settings, optionally filtered by group_name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Get settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group Name (e.g. umum, backup, integrasi)",
+                        "name": "group",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Settings retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.SettingResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve settings",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update or insert multiple settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Update settings",
+                "parameters": [
+                    {
+                        "description": "Settings update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.SettingUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Settings updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update settings",
                         "schema": {
                             "$ref": "#/definitions/response.HTTPErrorResponse"
                         }
@@ -1358,6 +4212,173 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Update an existing user with the provided information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTPSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update user",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Permanently delete a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete user",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{id}/soft-delete": {
+            "delete": {
+                "description": "Soft delete a user (mark as deleted without removing from database)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Soft delete user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User soft deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to soft delete user",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPErrorResponse"
+                        }
+                    }
+                }
             }
         }
     },
@@ -1384,6 +4405,109 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.AcademicSession": {
+            "type": "object",
+            "required": [
+                "end_date",
+                "name",
+                "start_date"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.AppPackage": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "max_students": {
+                    "type": "integer"
+                },
+                "max_teachers": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price_monthly": {
+                    "type": "number"
+                },
+                "price_yearly": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
         "entity.AuthToken": {
             "type": "object",
             "properties": {
@@ -1395,6 +4519,205 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entity.UserResponse"
+                }
+            }
+        },
+        "entity.BackupRecord": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "storage_path": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Class": {
+            "type": "object",
+            "required": [
+                "grade_number",
+                "level",
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "grade_number": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "$ref": "#/definitions/entity.SchoolLevel"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.DateOnly": {
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.EmailVerificationRequest": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Exam": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "academic_session_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration_minutes": {
+                    "type": "integer"
+                },
+                "exam_date": {
+                    "type": "string"
+                },
+                "exam_type": {
+                    "description": "daily, midterm, final, practice",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "max_score": {
+                    "type": "integer"
+                },
+                "section_id": {
+                    "type": "integer"
+                },
+                "subject_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.ExamMark": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "entered_at": {
+                    "type": "string"
+                },
+                "entered_by": {
+                    "description": "Teacher ID",
+                    "type": "integer"
+                },
+                "exam_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                },
+                "student_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
                 }
             }
         },
@@ -1471,8 +4794,14 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "created_by": {
+                    "type": "integer"
+                },
                 "deleted_at": {
                     "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string",
@@ -1504,12 +4833,18 @@ const docTemplate = `{
                     "maxLength": 500,
                     "minLength": 1
                 },
+                "school_id": {
+                    "type": "integer"
+                },
                 "size": {
                     "type": "integer",
                     "minimum": 1
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
                 },
                 "user_id": {
                     "type": "integer"
@@ -1554,6 +4889,19 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
+        },
+        "entity.LicenseStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "expired",
+                "suspended"
+            ],
+            "x-enum-varnames": [
+                "LicenseActive",
+                "LicenseExpired",
+                "LicenseSuspended"
+            ]
         },
         "entity.LoginRequest": {
             "type": "object",
@@ -1609,6 +4957,82 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Parent": {
+            "type": "object",
+            "required": [
+                "full_name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.ParentChild"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.ParentChild": {
+            "type": "object",
+            "properties": {
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_primary": {
+                    "type": "boolean"
+                },
+                "relationship": {
+                    "type": "string"
+                },
+                "student_number": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.PasswordResetConfirmRequest": {
             "type": "object",
             "required": [
@@ -1636,6 +5060,69 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Permission": {
+            "type": "object",
+            "required": [
+                "module_name",
+                "permission_code",
+                "permission_name"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "module_name": {
+                    "type": "string"
+                },
+                "permission_code": {
+                    "type": "string"
+                },
+                "permission_name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.PermissionResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "module_name": {
+                    "type": "string"
+                },
+                "permission_code": {
+                    "type": "string"
+                },
+                "permission_name": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.RefreshTokenRequest": {
             "type": "object",
             "required": [
@@ -1651,7 +5138,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
-                "password"
+                "password",
+                "user_type"
             ],
             "properties": {
                 "email": {
@@ -1660,6 +5148,15 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8
+                },
+                "school_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "user_type": {
+                    "$ref": "#/definitions/entity.UserType"
                 }
             }
         },
@@ -1674,14 +5171,1093 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.User": {
+        "entity.RestoreRequest": {
+            "type": "object",
+            "required": [
+                "filename"
+            ],
+            "properties": {
+                "filename": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Role": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_system_role": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "description": "NULL for system roles",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_system_role": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Schedule": {
+            "type": "object",
+            "properties": {
+                "academic_session_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "day_of_week": {
+                    "description": "0=Sunday, 1=Monday, etc.",
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "room_number": {
+                    "type": "string"
+                },
+                "section_id": {
+                    "type": "integer"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "subject_id": {
+                    "type": "integer"
+                },
+                "teacher_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.School": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "accreditation": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "npsn": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "principal_name": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                },
+                "school_level": {
+                    "$ref": "#/definitions/entity.SchoolLevel"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.SchoolStatus"
+                },
+                "subscription_end_date": {
+                    "type": "string"
+                },
+                "subscription_start_date": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.SchoolLevel": {
+            "type": "string",
+            "enum": [
+                "SD",
+                "SMP",
+                "SMA"
+            ],
+            "x-enum-varnames": [
+                "LevelSD",
+                "LevelSMP",
+                "LevelSMA"
+            ]
+        },
+        "entity.SchoolLicense": {
+            "type": "object",
+            "properties": {
+                "app_package_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "license_key": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.LicenseStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.SchoolResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.SchoolStatus"
+                }
+            }
+        },
+        "entity.SchoolStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "suspended"
+            ],
+            "x-enum-varnames": [
+                "SchoolActive",
+                "SchoolInactive",
+                "SchoolSuspended"
+            ]
+        },
+        "entity.Section": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "academic_session_id": {
+                    "type": "integer"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "class_id": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "room_number": {
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "description": "Homeroom teacher",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.SectionAttendanceRequest": {
+            "type": "object",
+            "properties": {
+                "academic_session_id": {
+                    "type": "integer"
+                },
+                "attendance_date": {
+                    "$ref": "#/definitions/entity.DateOnly"
+                },
+                "attendances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.StudentAttendanceEntry"
+                    }
+                },
+                "ip_address": {
+                    "type": "string"
+                },
+                "marked_by": {
+                    "description": "Teacher ID",
+                    "type": "integer"
+                },
+                "section_id": {
+                    "type": "integer"
+                },
+                "subject_id": {
+                    "description": "REQUIRED: must be filled by teacher before saving",
+                    "type": "integer"
+                },
+                "user_agent": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.SettingItem": {
+            "type": "object",
+            "required": [
+                "group_name",
+                "setting_key"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "setting_key": {
+                    "type": "string"
+                },
+                "setting_value": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.SettingResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "setting_key": {
+                    "type": "string"
+                },
+                "setting_value": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.SettingUpdateRequest": {
+            "type": "object",
+            "required": [
+                "settings"
+            ],
+            "properties": {
+                "settings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/entity.SettingItem"
+                    }
+                }
+            }
+        },
+        "entity.Staff": {
+            "type": "object",
+            "required": [
+                "employee_number",
+                "full_name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "department": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "employee_number": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "join_date": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.StaffStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StaffAttendance": {
+            "type": "object",
+            "properties": {
+                "attendance_date": {
+                    "$ref": "#/definitions/entity.DateOnly"
+                },
+                "check_in_device": {
+                    "type": "string"
+                },
+                "check_in_ip_address": {
+                    "type": "string"
+                },
+                "check_in_location": {
+                    "type": "string"
+                },
+                "check_in_time": {
+                    "$ref": "#/definitions/entity.TimeOnly"
+                },
+                "check_out_device": {
+                    "type": "string"
+                },
+                "check_out_ip_address": {
+                    "type": "string"
+                },
+                "check_out_location": {
+                    "type": "string"
+                },
+                "check_out_time": {
+                    "$ref": "#/definitions/entity.TimeOnly"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "employee_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "present, absent, late, sick, permission",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StaffStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive"
+            ],
+            "x-enum-varnames": [
+                "StaffActive",
+                "StaffInactive"
+            ]
+        },
+        "entity.Student": {
+            "type": "object",
+            "required": [
+                "full_name",
+                "student_number"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "admission_date": {
+                    "type": "string"
+                },
+                "blood_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nis": {
+                    "type": "string"
+                },
+                "nisn": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.StudentStatus"
+                },
+                "student_number": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StudentAttendance": {
+            "type": "object",
+            "properties": {
+                "academic_session_id": {
+                    "type": "integer"
+                },
+                "attendance_date": {
+                    "$ref": "#/definitions/entity.DateOnly"
+                },
+                "check_in_device": {
+                    "type": "string"
+                },
+                "check_in_ip_address": {
+                    "type": "string"
+                },
+                "check_in_location": {
+                    "type": "string"
+                },
+                "check_in_time": {
+                    "$ref": "#/definitions/entity.TimeOnly"
+                },
+                "check_out_device": {
+                    "type": "string"
+                },
+                "check_out_ip_address": {
+                    "type": "string"
+                },
+                "check_out_location": {
+                    "type": "string"
+                },
+                "check_out_time": {
+                    "$ref": "#/definitions/entity.TimeOnly"
+                },
+                "class_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "marked_by": {
+                    "description": "Teacher ID",
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "section_id": {
+                    "type": "integer"
+                },
+                "section_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "present, absent, late, sick, permission",
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "integer"
+                },
+                "student_name": {
+                    "description": "Display fields (populated via JOIN)",
+                    "type": "string"
+                },
+                "student_number": {
+                    "type": "string"
+                },
+                "subject_id": {
+                    "type": "integer"
+                },
+                "subject_name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StudentAttendanceEntry": {
+            "type": "object",
+            "properties": {
+                "notes": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "present, absent, late, sick, permission",
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StudentParent": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
+                "created_by": {
+                    "type": "integer"
+                },
                 "deleted_at": {
                     "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_primary": {
+                    "type": "boolean"
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "relationship": {
+                    "description": "father, mother, guardian",
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StudentSection": {
+            "type": "object",
+            "properties": {
+                "academic_session_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "enrollment_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "roll_number": {
+                    "type": "string"
+                },
+                "section_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "active, promoted, transferred",
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.StudentStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "graduated",
+                "transferred"
+            ],
+            "x-enum-varnames": [
+                "StudentActive",
+                "StudentInactive",
+                "StudentGraduated",
+                "StudentTransferred"
+            ]
+        },
+        "entity.Subject": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "credit_hours": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.SwitchSchoolRequest": {
+            "type": "object",
+            "required": [
+                "school_id"
+            ],
+            "properties": {
+                "school_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.Teacher": {
+            "type": "object",
+            "required": [
+                "employee_number",
+                "full_name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "employee_number": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "join_date": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "qualification": {
+                    "type": "string"
+                },
+                "school_id": {
+                    "type": "integer"
+                },
+                "specialization": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.TeacherStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.TeacherAttendance": {
+            "type": "object",
+            "properties": {
+                "attendance_date": {
+                    "$ref": "#/definitions/entity.DateOnly"
+                },
+                "check_in_device": {
+                    "type": "string"
+                },
+                "check_in_ip_address": {
+                    "type": "string"
+                },
+                "check_in_location": {
+                    "type": "string"
+                },
+                "check_in_time": {
+                    "$ref": "#/definitions/entity.TimeOnly"
+                },
+                "check_out_device": {
+                    "type": "string"
+                },
+                "check_out_ip_address": {
+                    "type": "string"
+                },
+                "check_out_location": {
+                    "type": "string"
+                },
+                "check_out_time": {
+                    "$ref": "#/definitions/entity.TimeOnly"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "present, absent, late, sick, permission",
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.TeacherStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive"
+            ],
+            "x-enum-varnames": [
+                "TeacherActive",
+                "TeacherInactive"
+            ]
+        },
+        "entity.TimeOnly": {
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.User": {
+            "type": "object",
+            "properties": {
+                "accessible_schools": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.School"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "deleted_by": {
+                    "type": "integer"
                 },
                 "email": {
                     "type": "string"
@@ -1698,6 +6274,12 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "last_login_at": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -1707,8 +6289,37 @@ const docTemplate = `{
                 "password_reset_token": {
                     "type": "string"
                 },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Permission"
+                    }
+                },
+                "role": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.Role"
+                        }
+                    ]
+                },
+                "school": {
+                    "$ref": "#/definitions/entity.School"
+                },
+                "school_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
                 "updated_at": {
                     "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "user_type": {
+                    "$ref": "#/definitions/entity.UserType"
                 },
                 "username": {
                     "type": "string"
@@ -1737,6 +6348,75 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "entity.UserResponse": {
+            "type": "object",
+            "properties": {
+                "accessible_schools": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.SchoolResponse"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "email_verified_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "last_login_at": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.PermissionResponse"
+                    }
+                },
+                "role": {
+                    "$ref": "#/definitions/entity.RoleResponse"
+                },
+                "school": {
+                    "$ref": "#/definitions/entity.SchoolResponse"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_type": {
+                    "$ref": "#/definitions/entity.UserType"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.UserType": {
+            "type": "string",
+            "enum": [
+                "super_admin",
+                "admin",
+                "teacher",
+                "student",
+                "parent",
+                "staff"
+            ],
+            "x-enum-varnames": [
+                "UserSuperAdmin",
+                "UserAdmin",
+                "UserTeacher",
+                "UserStudent",
+                "UserParent",
+                "UserStaff"
+            ]
         },
         "pdfs.TemplateData": {
             "type": "object",

@@ -8,8 +8,8 @@ import (
 
 func SetupLimiter() limiter.Config {
 	return limiter.Config{
-		Max:               20,
-		Expiration:        30 * time.Second,
+		Max:               100,
+		Expiration:        1 * time.Minute,
 		LimiterMiddleware: limiter.SlidingWindow{},
 	}
 }

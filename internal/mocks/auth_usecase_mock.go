@@ -12,25 +12,25 @@ type MockAuthUsecase struct {
 	mock.Mock
 }
 
-func (m *MockAuthUsecase) Register(email, password string) error {
-	args := m.Called(email, password)
+func (m *MockAuthUsecase) Register(email, password string, schoolID *int64, userType entity.UserType, ipAddress, userAgent string) error {
+	args := m.Called(email, password, schoolID, userType, ipAddress, userAgent)
 	return args.Error(0)
 }
 
-func (m *MockAuthUsecase) Login(email, password string) (*entity.AuthToken, error) {
-	args := m.Called(email, password)
+func (m *MockAuthUsecase) Login(email, password string, ipAddress, userAgent string) (*entity.AuthToken, error) {
+	args := m.Called(email, password, ipAddress, userAgent)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*entity.AuthToken), args.Error(1)
 }
 
-func (m *MockAuthUsecase) VerifyToken(token string) (*entity.User, error) {
+func (m *MockAuthUsecase) VerifyToken(token string) (*entity.UserResponse, error) {
 	args := m.Called(token)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*entity.User), args.Error(1)
+	return args.Get(0).(*entity.UserResponse), args.Error(1)
 }
 
 func (m *MockAuthUsecase) RefreshToken(refreshToken string) (*entity.AuthToken, error) {

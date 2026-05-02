@@ -53,6 +53,15 @@ func (c *FileController) UploadFile(ctx *fiber.Ctx) error {
 		})
 	}
 
+	schoolID, err := utils.GetSchoolIDFromToken(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.HTTPErrorResponse{
+			Status:  fiber.StatusUnauthorized,
+			Message: "Unauthorized",
+			Errors:  []response.JSONError{{Status: fiber.StatusUnauthorized, Message: "Invalid school ID"}},
+		})
+	}
+
 	file, err := ctx.FormFile("file")
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
@@ -76,7 +85,7 @@ func (c *FileController) UploadFile(ctx *fiber.Ctx) error {
 		})
 	}
 
-	uploadedFile, err := c.UseCase.UploadFile(context.Background(), userID, file, req)
+	uploadedFile, err := c.UseCase.UploadFile(context.Background(), schoolID, userID, file, req)
 	if err != nil {
 		c.Log.Errorf("Error uploading file: %v", err)
 		if strings.Contains(err.Error(), "file type not allowed") || strings.Contains(err.Error(), "file size exceeds") {
@@ -123,15 +132,17 @@ func (c *FileController) GetUserFiles(ctx *fiber.Ctx) error {
 		})
 	}
 
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
 	// Parse pagination parameters using utils
 	params := utils.ParsePaginationQuery(ctx)
 	category := ctx.Query("category")
 
 	var files *entity.FileListResponse
 	if category != "" {
-		files, err = c.UseCase.GetUserFilesByCategory(context.Background(), userID, category, params.Page, params.PageSize)
+		files, err = c.UseCase.GetUserFilesByCategory(context.Background(), schoolID, userID, category, params.Page, params.PageSize)
 	} else {
-		files, err = c.UseCase.GetUserFiles(context.Background(), userID, params.Page, params.PageSize)
+		files, err = c.UseCase.GetUserFiles(context.Background(), schoolID, userID, params.Page, params.PageSize)
 	}
 
 	if err != nil {
@@ -163,8 +174,9 @@ func (c *FileController) GetUserFiles(ctx *fiber.Ctx) error {
 func (c *FileController) GetPublicFiles(ctx *fiber.Ctx) error {
 	// Parse pagination parameters using utils
 	params := utils.ParsePaginationQuery(ctx)
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
 
-	files, err := c.UseCase.GetPublicFiles(context.Background(), params.Page, params.PageSize)
+	files, err := c.UseCase.GetPublicFiles(context.Background(), schoolID, params.Page, params.PageSize)
 	if err != nil {
 		c.Log.Errorf("Error getting public files: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
@@ -203,10 +215,12 @@ func (c *FileController) GetPrivateFiles(ctx *fiber.Ctx) error {
 		})
 	}
 
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
 	// Parse pagination parameters using utils
 	params := utils.ParsePaginationQuery(ctx)
 
-	files, err := c.UseCase.GetPrivateFilesByUserID(context.Background(), userID, params.Page, params.PageSize)
+	files, err := c.UseCase.GetPrivateFilesByUserID(context.Background(), schoolID, userID, params.Page, params.PageSize)
 	if err != nil {
 		c.Log.Errorf("Error getting private files: %v", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.HTTPErrorResponse{
@@ -246,6 +260,8 @@ func (c *FileController) UpdateFile(ctx *fiber.Ctx) error {
 		})
 	}
 
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
 	id, err := utils.ParseInt64FromParam(ctx, "id")
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
@@ -272,7 +288,7 @@ func (c *FileController) UpdateFile(ctx *fiber.Ctx) error {
 		})
 	}
 
-	file, err := c.UseCase.UpdateFile(context.Background(), id, userID, &req)
+	file, err := c.UseCase.UpdateFile(context.Background(), schoolID, id, userID, &req)
 	if err != nil {
 		c.Log.Errorf("Error updating file %d: %v", id, err)
 		if strings.Contains(err.Error(), "not found") {
@@ -325,6 +341,8 @@ func (c *FileController) DeleteFile(ctx *fiber.Ctx) error {
 		})
 	}
 
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
 	id, err := utils.ParseInt64FromParam(ctx, "id")
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
@@ -334,7 +352,7 @@ func (c *FileController) DeleteFile(ctx *fiber.Ctx) error {
 		})
 	}
 
-	err = c.UseCase.DeleteFile(context.Background(), id, userID)
+	err = c.UseCase.DeleteFile(context.Background(), schoolID, id, userID)
 	if err != nil {
 		c.Log.Errorf("Error deleting file %d: %v", id, err)
 		if strings.Contains(err.Error(), "not found") {
@@ -387,6 +405,8 @@ func (c *FileController) DownloadFile(ctx *fiber.Ctx) error {
 		})
 	}
 
+	schoolID, _ := utils.GetSchoolIDFromToken(ctx)
+
 	id, err := utils.ParseInt64FromParam(ctx, "id")
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.HTTPErrorResponse{
@@ -396,7 +416,7 @@ func (c *FileController) DownloadFile(ctx *fiber.Ctx) error {
 		})
 	}
 
-	fileResponse, err := c.UseCase.DownloadFile(context.Background(), id, userID)
+	fileResponse, err := c.UseCase.DownloadFile(context.Background(), schoolID, id, userID)
 	if err != nil {
 		c.Log.Errorf("Error downloading file %d: %v", id, err)
 		if strings.Contains(err.Error(), "not found") {

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -211,7 +212,12 @@ func (uc *emailUsecase) ResetPassword(token, newPassword string) error {
 	user.Password = hashedPassword
 	user.UpdatedAt = time.Now()
 
-	if err := uc.userRepo.Update(user); err != nil {
+	var schoolID int64
+	if len(user.SchoolID) > 0 {
+		schoolID = user.SchoolID[0]
+	}
+
+	if err := uc.userRepo.Update(context.Background(), schoolID, user); err != nil {
 		uc.logger.Errorf("Failed to update user password: %v", err)
 		return fmt.Errorf("failed to update password: %w", err)
 	}

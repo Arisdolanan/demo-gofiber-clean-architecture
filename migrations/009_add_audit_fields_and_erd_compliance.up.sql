@@ -268,6 +268,7 @@ ALTER TABLE activity_logs
 -- Class Subjects pivot table
 CREATE TABLE IF NOT EXISTS class_subjects (
     id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
     class_id BIGINT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     subject_id BIGINT NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
     academic_session_id BIGINT NOT NULL REFERENCES academic_sessions(id) ON DELETE CASCADE,
@@ -277,7 +278,7 @@ CREATE TABLE IF NOT EXISTS class_subjects (
     created_by BIGINT REFERENCES users(id),
     updated_by BIGINT REFERENCES users(id),
     deleted_by BIGINT REFERENCES users(id),
-    UNIQUE(class_id, subject_id, academic_session_id)
+    UNIQUE(school_id, class_id, subject_id, academic_session_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_class_subjects_class_id ON class_subjects(class_id);
@@ -287,6 +288,7 @@ CREATE INDEX IF NOT EXISTS idx_class_subjects_session_id ON class_subjects(acade
 -- Teacher Subjects pivot table
 CREATE TABLE IF NOT EXISTS teacher_subjects (
     id BIGSERIAL PRIMARY KEY,
+    school_id BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
     teacher_id BIGINT NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
     section_id BIGINT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
     subject_id BIGINT NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
@@ -297,7 +299,7 @@ CREATE TABLE IF NOT EXISTS teacher_subjects (
     created_by BIGINT REFERENCES users(id),
     updated_by BIGINT REFERENCES users(id),
     deleted_by BIGINT REFERENCES users(id),
-    UNIQUE(teacher_id, section_id, subject_id, academic_session_id)
+    UNIQUE(school_id, teacher_id, section_id, subject_id, academic_session_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_teacher_subjects_teacher_id ON teacher_subjects(teacher_id);
